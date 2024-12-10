@@ -287,7 +287,7 @@ def send_verify_email(email, user_verification_key=None, role=None):
         if not user_verification_key:
             raise ValueError("User verification key is required")
 
-        verification_link = f"http://127.0.0.1/verify/{user_verification_key}"
+        verification_link = f"https://jacobfriisstrand.eu.pythonanywhere.com/verify/{user_verification_key}"
 
         content = f"""
             <p>Welcome to KEALT!</p>
@@ -363,7 +363,7 @@ def send_checkout_email(user_email, user_name, cart):
 
 def send_reset_password_email(email, reset_key):
     try:
-        reset_url = f"http://127.0.0.1/reset-password/{reset_key}"
+        reset_url = f"https://jacobfriisstrand.eu.pythonanywhere.com/reset-password/{reset_key}"
 
         content = f"""
             <p>You have requested to reset your password.</p>
