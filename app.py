@@ -900,25 +900,38 @@ def forgot_password():
         
         db, cursor = x.db()
         
-        # First try users table
-        q_user = """UPDATE users 
-                    SET user_password_reset_key = %s, 
-                        user_password_reset_expires_at = %s 
-                    WHERE user_email = %s 
-                    AND user_deleted_at = 0"""
-        cursor.execute(q_user, (reset_key, reset_expires_at, email))
+        # First check if the email exists in either table
+        cursor.execute("""
+            SELECT 'user' as type FROM users 
+            WHERE user_email = %s AND user_deleted_at = 0
+            UNION
+            SELECT 'restaurant' as type FROM restaurants 
+            WHERE restaurant_email = %s AND restaurant_deleted_at = 0
+        """, (email, email))
         
-        # If no user found, try restaurants table
-        if cursor.rowcount == 0:
-            q_restaurant = """UPDATE restaurants 
-                             SET restaurant_password_reset_key = %s, 
-                                 restaurant_password_reset_expires_at = %s 
-                             WHERE restaurant_email = %s 
-                             AND restaurant_deleted_at = 0"""
-            cursor.execute(q_restaurant, (reset_key, reset_expires_at, email))
+        result = cursor.fetchone()
+        
+        if not result:
+            toast = render_template("___toast.html", message="No account found with this email address")
+            return f"""<template mix-target="#toast">{toast}</template>""", 400
             
-            if cursor.rowcount == 0:
-                raise x.CustomException("Email not found", 400)
+        # Update the appropriate table
+        if result['type'] == 'user':
+            cursor.execute("""
+                UPDATE users 
+                SET user_password_reset_key = %s, 
+                    user_password_reset_expires_at = %s 
+                WHERE user_email = %s 
+                AND user_deleted_at = 0
+            """, (reset_key, reset_expires_at, email))
+        else:
+            cursor.execute("""
+                UPDATE restaurants 
+                SET restaurant_verification_key = %s,  # Using existing verification key field
+                    restaurant_verified_at = %s 
+                WHERE restaurant_email = %s 
+                AND restaurant_deleted_at = 0
+            """, (reset_key, reset_expires_at, email))
         
         # Send reset email
         x.send_reset_password_email(email=email, reset_key=reset_key)
@@ -932,7 +945,7 @@ def forgot_password():
         if isinstance(ex, x.CustomException):
             toast = render_template("___toast.html", message=ex.message)
             return f"""<template mix-target="#toast">{toast}</template>""", ex.code
-        toast = render_template("___toast.html", message="System under maintenance")
+        toast = render_template("___toast.html", message="Unable to process your request. Please try again later.")
         return f"""<template mix-target="#toast">{toast}</template>""", 500
     finally:
         if "cursor" in locals(): cursor.close()
