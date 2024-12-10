@@ -1,0 +1,454 @@
+{
+  "info": {
+    "name": "KEALT API Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/login",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "email",
+                  "value": "customer@exam.com"
+                },
+                {
+                  "key": "password",
+                  "value": "password"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Body matches string', function () {",
+                  "    pm.expect(pm.response.text()).to.include('html');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/logout"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Body matches string', function () {",
+                  "    pm.expect(pm.response.text()).to.include('template');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login with Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Check if login was successful",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Get the session cookie",
+                  "const sessionCookie = pm.cookies.get('session');",
+                  "",
+                  "// Save the session cookie to a collection variable",
+                  "if (sessionCookie) {",
+                  "    pm.collectionVariables.set('sessionCookie', sessionCookie);",
+                  "    console.log('Session cookie saved:', sessionCookie);",
+                  "}",
+                  "",
+                  "pm.test('Session cookie is set', function () {",
+                  "    pm.expect(sessionCookie).to.exist;",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Clear any existing session cookie before login",
+                  "pm.cookies.clear();"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/login",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "email",
+                  "value": "{{userEmail}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{userPassword}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Restaurant Dashboard",
+      "item": [
+        {
+          "name": "Get Restaurant Dashboard",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/restaurant-dashboard"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Body matches string', function () {",
+                  "    pm.expect(pm.response.text()).to.include('template');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create New Restaurant",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/restaurant-dashboard/new",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "restaurant_name",
+                  "value": "Test Restaurant"
+                },
+                {
+                  "key": "restaurant_address",
+                  "value": "123 Test St"
+                },
+                {
+                  "key": "restaurant_cuisine_types",
+                  "value": "Italian"
+                },
+                {
+                  "key": "price_level",
+                  "value": "$$"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Body matches string', function () {",
+                  "    pm.expect(pm.response.text()).to.include('template');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Items",
+      "item": [
+        {
+          "name": "Add Item to Cart",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/cart/add",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "item_pk",
+                  "value": "test-uuid"
+                },
+                {
+                  "key": "item_title",
+                  "value": "Test Item"
+                },
+                {
+                  "key": "item_price",
+                  "value": "10.99"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Body matches string', function () {",
+                  "    pm.expect(pm.response.text()).to.include('template');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove from Cart",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/cart/remove",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "cart_item_id",
+                  "value": "test-cart-uuid"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Body matches string', function () {",
+                  "    pm.expect(pm.response.text()).to.include('template');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "User Management",
+      "item": [
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/users/profile",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "user_name",
+                  "value": "Test User"
+                },
+                {
+                  "key": "user_last_name",
+                  "value": "Last Name"
+                },
+                {
+                  "key": "user_email",
+                  "value": "test@example.com"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Body matches string', function () {",
+                  "    pm.expect(pm.response.text()).to.include('template');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Account",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/users/delete",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "password",
+                  "value": "Test123!"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Body matches string', function () {",
+                  "    pm.expect(pm.response.text()).to.include('template');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "item": [
+        {
+          "name": "Search Items",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/search?q=test",
+              "query": [
+                {
+                  "key": "q",
+                  "value": "test"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Body matches string', function () {",
+                  "    pm.expect(pm.response.text()).to.include('template');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Password Reset",
+      "item": [
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/forgot-password",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "email",
+                  "value": "test@example.com"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Body matches string', function () {",
+                  "    pm.expect(pm.response.text()).to.include('template');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/reset-password/{{resetKey}}",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "password",
+                  "value": "NewTest123!"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Body matches string', function () {",
+                  "    pm.expect(pm.response.text()).to.include('template');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+} 
