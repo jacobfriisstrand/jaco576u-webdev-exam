@@ -41,10 +41,10 @@ def raise_custom_exception(error, status_code):
 ##############################
 def db():
     db = mysql.connector.connect(
-        host="mysql",      # This should match your Docker service name
-        user="root",       
-        password="password",  # Ensure this matches your docker-compose.yml
-        database="company"    # Ensure this database exists
+        host="jacobfriisstrand.mysql.eu.pythonanywhere-services.com",      # This should match your Docker service name
+        user="jacobfriisstrand",
+        password="!Igim2265",  # Ensure this matches your docker-compose.yml
+        database="jacobfriisstrand$company"    # Ensure this database exists
     )
     cursor = db.cursor(dictionary=True)
     return db, cursor
@@ -163,7 +163,7 @@ def validate_uuid4(uuid4 = ""):
     return uuid4
 
 ##############################
-UPLOAD_ITEM_FOLDER = './static/dishes'
+UPLOAD_ITEM_FOLDER = '/home/jacobfriisstrand/jaco576u-webdev-exam/static/dishes'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'webp'}
 
 def allowed_file(filename):
@@ -175,11 +175,11 @@ def validate_file_upload(file):
     if not file or file.filename == '':
         toast = render_template("___toast.html", message="No file uploaded")
         return f"""<template mix-target="#toast">{toast}</template>""", 400
- 
+
     if '.' not in file.filename or file.filename.rsplit('.', 1)[1].lower() not in ALLOWED_EXTENSIONS:
         toast = render_template("___toast.html", message="File type is not allowed")
         return f"""<template mix-target="#toast">{toast}</template>""", 400
- 
+
     # Generate a secure filename
     unique_filename = f"{uuid.uuid4()}.{file.filename.rsplit('.', 1)[1].lower()}"
     return unique_filename
@@ -283,18 +283,18 @@ def send_verify_email(email, user_verification_key=None, role=None):
     try:
         if not role or (role not in ["customer", "partner", "restaurant"]):
             raise ValueError("Invalid role")
-        
+
         if not user_verification_key:
             raise ValueError("User verification key is required")
 
         verification_link = f"http://127.0.0.1/verify/{user_verification_key}"
-        
+
         content = f"""
             <p>Welcome to KEALT!</p>
             <p>Please verify your account by clicking the button below:</p>
             <a href="{verification_link}" class="button">Verify Account</a>
         """
-        
+
         body = _get_email_template("Account Verification - KEALT", content)
 
         message = MIMEMultipart()
@@ -318,7 +318,7 @@ def send_checkout_email(user_email, user_name, cart):
         cart_items_html = "<table>"
         cart_items_html += "<tr><th>Item</th><th>Price</th></tr>"
         total = 0
-        
+
         for item in cart:
             cart_items_html += f"""
             <tr>
@@ -327,7 +327,7 @@ def send_checkout_email(user_email, user_name, cart):
             </tr>
             """
             total += float(item.get('item_price', 0))
-        
+
         cart_items_html += f"""
         <tr>
             <td><strong>Total</strong></td>
@@ -342,7 +342,7 @@ def send_checkout_email(user_email, user_name, cart):
             {cart_items_html}
             <p>Bon appetit!</p>
         """
-        
+
         body = _get_email_template("Order Confirmation - KEALT", content)
 
         message = MIMEMultipart()
@@ -364,7 +364,7 @@ def send_checkout_email(user_email, user_name, cart):
 def send_reset_password_email(email, reset_key):
     try:
         reset_url = f"http://127.0.0.1/reset-password/{reset_key}"
-        
+
         content = f"""
             <p>You have requested to reset your password.</p>
             <p>Click the button below to set a new password:</p>
@@ -372,7 +372,7 @@ def send_reset_password_email(email, reset_key):
             <p>This link will expire in 30 minutes.</p>
             <p>If you didn't request this, please ignore this email.</p>
         """
-        
+
         body = _get_email_template("Reset Your Password - KEALT", content)
 
         message = MIMEMultipart()
@@ -397,7 +397,7 @@ def send_account_deletion_email(email):
             <p>Your account has been successfully deleted.</p>
             <p>If you did not request this action, please contact support immediately.</p>
         """
-        
+
         body = _get_email_template("Account Deletion - KEALT", content)
 
         message = MIMEMultipart()
@@ -423,7 +423,7 @@ def send_user_blocked_email(to_email, user_name):
             <p>Your account has been temporarily suspended for not complying with our Terms and Conditions.</p>
             <p>To dispute this decision or request a review of your account status, please reach out to our support team.</p>
         """
-        
+
         body = _get_email_template("Account Blocked - KEALT", content)
 
         message = MIMEMultipart()
@@ -450,7 +450,7 @@ def send_item_blocked_email(to_email, user_name, item_title):
             <p>This means the item is no longer visible to customers and cannot be purchased.</p>
             <p>To dispute this decision or request a review of your item's status, please reach out to our support team.</p>
         """
-        
+
         body = _get_email_template("Item Blocked - KEALT", content)
 
         message = MIMEMultipart()

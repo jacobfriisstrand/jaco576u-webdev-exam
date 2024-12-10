@@ -14,13 +14,13 @@ ic.configureOutput(prefix=f'***** | ', includeContext=True)
 
 db, cursor = x.db()
 
-def insert_user(user):       
+def insert_user(user):
     user["user_password_reset_key"] = None
     user["user_password_reset_expires_at"] = None
-    
+
     q = f"""
         INSERT INTO users
-        VALUES (%s, %s ,%s ,%s ,%s ,%s ,%s ,%s ,%s ,%s ,%s ,%s, %s, %s)        
+        VALUES (%s, %s ,%s ,%s ,%s ,%s ,%s ,%s ,%s ,%s ,%s ,%s, %s, %s)
         """
     values = tuple(user.values())
     cursor.execute(q, values)
@@ -76,7 +76,7 @@ try:
     cursor.execute("DROP TABLE IF EXISTS users_roles")
     cursor.execute("DROP TABLE IF EXISTS roles")
     cursor.execute("DROP TABLE IF EXISTS users")
-    
+
     ##############################
     # Create roles table first
     q = """
@@ -91,10 +91,10 @@ try:
     # Insert roles
     q = f"""
         INSERT INTO roles (role_pk, role_name)
-        VALUES 
-        ("{x.ADMIN_ROLE_PK}", "admin"), 
-        ("{x.CUSTOMER_ROLE_PK}", "customer"), 
-        ("{x.PARTNER_ROLE_PK}", "partner"), 
+        VALUES
+        ("{x.ADMIN_ROLE_PK}", "admin"),
+        ("{x.CUSTOMER_ROLE_PK}", "customer"),
+        ("{x.PARTNER_ROLE_PK}", "partner"),
         ("{x.RESTAURANT_ROLE_PK}", "restaurant")
         """
     cursor.execute(q)
@@ -119,7 +119,7 @@ try:
             user_password_reset_expires_at BIGINT,
             PRIMARY KEY(user_pk)
         )
-        """        
+        """
     cursor.execute(q)
 
     ##############################
@@ -202,7 +202,7 @@ try:
     """
     cursor.execute(q)
 
-    ############################## 
+    ##############################
     # Create admin user
     user_pk = str(uuid.uuid4())
     user = {
@@ -217,15 +217,15 @@ try:
         "user_blocked_at": 0,
         "user_updated_at": 0,
         "user_verified_at": int(time.time()),
-        "user_verification_key": str(uuid.uuid4()) 
-    }            
+        "user_verification_key": str(uuid.uuid4())
+    }
     insert_user(user)
     cursor.execute("""
         INSERT INTO users_roles (user_role_user_fk, user_role_role_fk)
         VALUES (%s, %s)
     """, (user_pk, x.ADMIN_ROLE_PK))
 
-    ############################## 
+    ##############################
     # Create single customer
     user_pk = str(uuid.uuid4())
     user = {
@@ -248,7 +248,7 @@ try:
         VALUES (%s, %s)
     """, (user_pk, x.CUSTOMER_ROLE_PK))
 
-    ############################## 
+    ##############################
     # Create single partner
     user_pk = str(uuid.uuid4())
     user = {
@@ -271,7 +271,7 @@ try:
         VALUES (%s, %s)
     """, (user_pk, x.PARTNER_ROLE_PK))
 
-    ############################## 
+    ##############################
     # Create single restaurant owner
     restaurant_owner_pk = str(uuid.uuid4())
     user = {
@@ -326,20 +326,20 @@ try:
     # Add some items to the test restaurant
     test_items = [
         {
-            "title": "Margherita Pizza", 
-            "price": 89.00, 
+            "title": "Margherita Pizza",
+            "price": 89.00,
             "desc": "Classic tomato and mozzarella",
             "images": [f"dish_{random.randint(1, 100)}.jpg", f"dish_{random.randint(1, 100)}.jpg", f"dish_{random.randint(1, 100)}.jpg"]
         },
         {
-            "title": "Pasta Carbonara", 
-            "price": 109.00, 
+            "title": "Pasta Carbonara",
+            "price": 109.00,
             "desc": "Creamy pasta with bacon",
             "images": [f"dish_{random.randint(1, 100)}.jpg", f"dish_{random.randint(1, 100)}.jpg", f"dish_{random.randint(1, 100)}.jpg"]
         },
         {
-            "title": "Tiramisu", 
-            "price": 59.00, 
+            "title": "Tiramisu",
+            "price": 59.00,
             "desc": "Classic Italian dessert",
             "images": [f"dish_{random.randint(1, 100)}.jpg", f"dish_{random.randint(1, 100)}.jpg", f"dish_{random.randint(1, 100)}.jpg"]
         }
@@ -379,8 +379,8 @@ try:
                 int(time.time())
             ))
 
-    ############################## 
-    # Create 50 additional restaurants 
+    ##############################
+    # Create 50 additional restaurants
     for _ in range(50):
         # First create a user that will own the restaurant
         user_pk = str(uuid.uuid4())
@@ -454,7 +454,7 @@ try:
                 item_pk,
                 restaurant_pk,
                 dish,
-                fake.paragraph(nb_sentences=3),
+                random.choice(constants.item_descriptions),
                 round(random.uniform(50, 150) * 2) / 2,
                 int(time.time()),
                 0,
@@ -477,7 +477,7 @@ try:
                     int(time.time())
                 ))
 
-    ############################## 
+    ##############################
     # Create 50 additional customers
     for _ in range(50):
         user_pk = str(uuid.uuid4())
@@ -503,7 +503,7 @@ try:
             VALUES (%s, %s)
         """, (user_pk, x.CUSTOMER_ROLE_PK))
 
-    ############################## 
+    ##############################
     # Create 50 additional partners
     for _ in range(50):
         user_pk = str(uuid.uuid4())
