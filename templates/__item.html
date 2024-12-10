@@ -23,7 +23,7 @@
         <div class="grid gap-2">
             <p>{{ item['restaurant_name'] }}</p>
             <p class="font-bold">{{ item['item_title'] }}</p>
-            <p>{{ item.get('item_desc', '') }}</p>
+            <p class="text-balance">{{ item.get('item_desc', '') }}</p>
         </div>
         <sl-format-number class="flex text-cta mt-auto font-bold" type="currency" currency="DKK" value="{{ item['item_price'] }}" lang="da"></sl-format-number>
         <sl-button

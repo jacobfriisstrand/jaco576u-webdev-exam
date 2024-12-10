@@ -1,0 +1,339 @@
+
+
+{
+	"variables": {
+		"baseUrl": "127.0.0.1",
+		"userId": "test-user-id"
+	},
+	"info": {
+		"name": "App Routes Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Signup View",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Contains signup form\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"signup\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/signup"
+					}
+				},
+				{
+					"name": "Signup Submit",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Redirects to login\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(pm.response.text()).to.include(\"login\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/signup",
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "test@example.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "testpassword",
+									"type": "text"
+								},
+								{
+									"key": "restaurant_name",
+									"value": "Test Restaurant",
+									"type": "text"
+								},
+								{
+									"key": "restaurant_address",
+									"value": "Test Address",
+									"type": "text"
+								},
+								{
+									"key": "price_level",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "cuisine_types",
+									"value": "[\"Italian\", \"Pizza\"]",
+									"type": "text"
+								},
+								{
+									"key": "account_type",
+									"value": "customer",
+									"type": "text"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Login View",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Contains login form\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"Login\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/login"
+					}
+				},
+				{
+					"name": "Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Redirects to login\", function () {",
+									"    pm.response.to.have.status(302);",
+									"    pm.response.to.have.header(\"Location\", /.*login.*/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/logout"
+					}
+				}
+			]
+		},
+		{
+			"name": "Password Reset",
+			"item": [
+				{
+					"name": "Forgot Password View",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Contains reset form\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"Reset password\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/forgot-password"
+					}
+				},
+				{
+					"name": "Reset Password View",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Redirects for invalid key\", function () {",
+									"    pm.response.to.have.status(302);",
+									"    pm.response.to.have.header(\"Location\", /.*login.*/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/reset-password/invalid-key"
+					}
+				}
+			]
+		},
+		{
+			"name": "Customer",
+			"item": [
+				{
+					"name": "Customer Dashboard",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Redirects if not logged in\", function () {",
+									"    pm.response.to.have.status(302);",
+									"    pm.response.to.have.header(\"Location\", /.*login.*/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/customer"
+					}
+				}
+			]
+		},
+		{
+			"name": "Checkout",
+			"item": [
+				{
+					"name": "View Checkout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Redirects if not logged in\", function () {",
+									"    pm.response.to.have.status(302);",
+									"    pm.response.to.have.header(\"Location\", /.*login.*/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/checkout"
+					}
+				},
+				{
+					"name": "Thank You Page",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Redirects if not logged in\", function () {",
+									"    pm.response.to.have.status(302);",
+									"    pm.response.to.have.header(\"Location\", /.*login.*/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/thank-you"
+					}
+				}
+			]
+		},
+		{
+			"name": "Restaurant Management",
+			"item": [
+				{
+					"name": "Create Restaurant",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Restaurant created successfully\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"success\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/restaurant-dashboard/new",
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "restaurant_name",
+									"value": "Test Restaurant",
+									"type": "text"
+								},
+								{
+									"key": "restaurant_address",
+									"value": "Test Address",
+									"type": "text"
+								},
+								{
+									"key": "price_level",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "cuisine_types",
+									"value": "[\"Italian\", \"Pizza\"]",
+									"type": "text"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Search",
+			"item": [
+				{
+					"name": "Search Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Contains search results\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"Search\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/search/test?q=searchterm"
+					}
+				}
+			]
+		}
+	]
+}

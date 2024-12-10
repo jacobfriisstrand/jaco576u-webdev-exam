@@ -454,7 +454,7 @@ try:
                 item_pk,
                 restaurant_pk,
                 dish,
-                fake.paragraph(nb_sentences=3),
+                random.choice(constants.item_descriptions),
                 round(random.uniform(50, 150) * 2) / 2,
                 int(time.time()),
                 0,

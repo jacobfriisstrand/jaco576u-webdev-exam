@@ -240,8 +240,8 @@ def get_item_pagination(page_number):
             SELECT items.*, restaurants.restaurant_name 
             FROM items 
             JOIN restaurants ON items.item_restaurant_fk = restaurants.restaurant_pk 
-            WHERE items.item_deleted_at = 0
-            AND restaurants.restaurant_deleted_at = 0
+            WHERE items.item_deleted_at = 0 OR items.item_blocked_at = 0
+            AND restaurants.restaurant_deleted_at = 0 
             ORDER BY item_title ASC
             LIMIT %s OFFSET %s
         """, (total_items_with_hanging, offset))
@@ -346,7 +346,8 @@ def view_restaurant(restaurant_pk):
             FROM items 
             JOIN restaurants ON items.item_restaurant_fk = restaurants.restaurant_pk 
             WHERE items.item_restaurant_fk = %s
-            AND items.item_deleted_at = 0
+            AND items.item_deleted_at = 0 
+            AND items.item_blocked_at = 0  -- Ensure only non-blocked items are fetched
         """, (restaurant_pk,))
         items = items_cursor.fetchall()
 
@@ -406,8 +407,10 @@ def view_dishes():
         db, cursor = x.db()
         cursor.execute("""
         SELECT items.*, restaurants.restaurant_name 
-        FROM items 
+        FROM items  
         JOIN restaurants ON items.item_restaurant_fk = restaurants.restaurant_pk 
+        WHERE items.item_deleted_at = 0 OR items.item_blocked_at = 0
+        AND restaurants.restaurant_deleted_at = 0 
         ORDER BY item_title ASC
         LIMIT 0,12
         """)
@@ -585,8 +588,10 @@ def view_search():
             SELECT items.*, restaurants.restaurant_name 
             FROM items 
             JOIN restaurants ON items.item_restaurant_fk = restaurants.restaurant_pk 
-            WHERE LOWER(item_title) LIKE LOWER(%s)
-            OR LOWER(item_desc) LIKE LOWER(%s)
+            WHERE (items.item_deleted_at = 0 OR items.item_blocked_at = 0)
+            AND (restaurants.restaurant_deleted_at = 0 OR restaurants.restaurant_blocked_at = 0)
+            AND (LOWER(item_title) LIKE LOWER(%s)
+            OR LOWER(item_desc) LIKE LOWER(%s))
             LIMIT 12
         """, (f"%{search_query}%", f"%{search_query}%"))
         items = cursor.fetchall()
@@ -766,71 +771,6 @@ def view_admin():
     finally:
         if "cursor" in locals(): cursor.close()
         if "db" in locals(): db.close()
-
-
-
-@app.get("/admin")
-@x.no_cache
-def view_admin_two():
-    try:
-        # Ensure the logged-in user has the "admin" role
-        if not "admin" in session.get("user").get("roles"): return redirect(url_for("view_login"))
-        user = session.get("user")
- 
-        # Connect to the database and retrieve non-admin users
-        db, cursor = x.db()
-        q_user = """
-            SELECT DISTINCT users.*, roles.role_name
-            FROM users
-            JOIN users_roles
-                ON users.user_pk = users_roles.user_role_user_fk
-            JOIN roles
-                ON users_roles.user_role_role_fk = roles.role_pk
-            WHERE roles.role_name != 'admin'
-        """
-        cursor.execute(q_user)
-        users = cursor.fetchall()
- 
-        q_item = """
-            SELECT items.*,
-                   (SELECT item_images.item_image
-                    FROM item_images
-                    WHERE item_images.item_fk = items.item_pk
-                    ORDER BY item_images.item_image_created_at ASC
-                    LIMIT 1) AS image
-            FROM items
-        """
-        cursor.execute(q_item)
-        items = cursor.fetchall()
- 
- 
-        if not users:
-            message = "No users found."
-        else:
-            message = ""
- 
-        # Render the admin view with non-admin users
-        return render_template("view_admin.html", users=users, user=user, items=items, message=message)
- 
-    except Exception as ex:
-        ic(ex)
-        if "db" in locals():
-            db.rollback()
-        if isinstance(ex, x.CustomException):
-            toast = render_template("___toast.html", message=ex.message)
-            return f"""<template mix-target="#toast" mix-bottom>{toast}</template>""", ex.code
-        if isinstance(ex, x.mysql.connector.Error):
-            ic(ex)
-            return "<template>System upgrading</template>", 500
-        return "<template>System under maintenance</template>", 500
- 
-    finally:
-        if "cursor" in locals():
-            cursor.close()
-        if "db" in locals():
-            db.close()
-
-
 
 
 @app.get("/profile")
