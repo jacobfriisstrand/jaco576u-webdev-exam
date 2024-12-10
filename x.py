@@ -43,7 +43,7 @@ def db():
     db = mysql.connector.connect(
         host="jacobfriisstrand.mysql.eu.pythonanywhere-services.com",      # This should match your Docker service name
         user="jacobfriisstrand",
-        password="!Igim2265",  # Ensure this matches your docker-compose.yml
+        password="webdevexam2024",  # Ensure this matches your docker-compose.yml
         database="jacobfriisstrand$company"    # Ensure this database exists
     )
     cursor = db.cursor(dictionary=True)
