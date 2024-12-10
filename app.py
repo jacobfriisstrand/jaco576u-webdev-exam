@@ -247,6 +247,16 @@ def get_item_pagination(page_number):
         """, (total_items_with_hanging, offset))
         
         items = cursor.fetchall()
+
+        # Add this section to fetch images for each item
+        for item in items:
+            cursor.execute("""
+                SELECT * FROM item_images 
+                WHERE image_item_fk = %s 
+                ORDER BY image_order
+            """, (item['item_pk'],))
+            item['images'] = cursor.fetchall()
+        
         html = "" # Server side rendering
         
         # Render only up to items_per_page
@@ -270,7 +280,7 @@ def get_item_pagination(page_number):
                 {new_button}
             </template>
         """
-    
+
     except Exception as ex:
         print("#"*1000)
         print(ex)
@@ -1243,7 +1253,7 @@ def create_item():
                 item_pk, item_restaurant_fk, item_title, 
                 item_desc, item_price, item_created_at, 
                 item_deleted_at, item_updated_at, item_blocked_at
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             item_pk,
             session["user"]["restaurant"]["restaurant_pk"],
