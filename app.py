@@ -1983,8 +1983,9 @@ def add_to_cart():
 @app.post("/cart/remove")
 def remove_from_cart():
     try:
-        if not check_role_access(['customer']):
-            raise x.CustomException("Unauthorized", 401)
+        # Remove this check to allow non-logged in users to remove from cart
+        # if not check_role_access(['customer']):
+        #     raise x.CustomException("Unauthorized", 401)
 
         cart_item_id = request.form.get('cart_item_id')
         ic(f"Attempting to remove cart item with ID: {cart_item_id}")
