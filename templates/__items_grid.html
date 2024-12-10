@@ -1,0 +1,37 @@
+{% if items %}
+<div class="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
+    {% for item in items %}
+    <div id="item-{{ item.item_pk }}">
+        <sl-card>
+            <img slot="image"
+                 src="{{ url_for('static', filename='dishes/' + (item.images[0].image_filename if item.images else 'default_dish.jpg')) }}"
+                 alt="{{ item.item_title }}"
+                 class="object-cover aspect-[16/9]">
+            <div class="flex flex-col gap-4">
+                <div>
+                    <h3 class="mb-0 text-lg">{{ item.item_title }}</h3>
+                    <p class="text-gray-800">{{ item.item_desc }}</p>
+                </div>
+                <sl-format-number class="font-semibold" type="currency" currency="DKK"
+                    value="{{ item.item_price }}" lang="da">
+                </sl-format-number>
+            </div>
+            <div slot="footer" class="flex flex-wrap gap-2">
+                <sl-button class="w-full" variant="primary" onclick="openDialog('edit-item-dialog-{{ item.item_pk }}')">
+                    <sl-icon slot="prefix" name="pencil"></sl-icon>
+                    Edit
+                </sl-button>
+                <sl-button class="w-full" variant="danger" onclick="openDialog('delete-item-dialog-{{ item.item_pk }}')">
+                    <sl-icon slot="prefix" name="trash"></sl-icon>
+                    Delete
+                </sl-button>
+            </div>
+        </sl-card>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center p-8 text-gray-500">
+    <p>No items found</p>
+</div>
+{% endif %} 

@@ -1,0 +1,33 @@
+<sl-drawer id="cart-drawer" label="Cart" class="z-[10000000]">
+    <div>
+        <div id="cart" class="divide-y space-y-4">
+            {% set cart = request.cookies.get('cart') %}
+            {% if cart %}
+                {% set cart = cart|from_json %}
+                {% include "__cart_items.html" %}
+            {% else %}
+                <p>Your cart is empty</p>
+            {% endif %}
+        </div>
+
+        <div slot="footer" class="flex flex-col gap-4">
+            <p class="flex justify-between text-base mt-8">
+                <span class="font-bold">Total</span>
+                <span>
+                    <span id="cart-total">
+                        {% set cart = request.cookies.get('cart') %}
+                        {% if cart %}
+                            {{ (cart|from_json)|cart_total|round(2) }}
+                        {% else %}
+                            0.00
+                        {% endif %}
+                    </span>
+                    <span>DKK</span>
+                </span>
+            </p>
+            <sl-button href="{{ url_for('view_checkout') }}" variant="primary" id="checkout-btn">
+                Checkout
+            </sl-button>
+        </div>
+    </div>
+</sl-drawer>

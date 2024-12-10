@@ -1,0 +1,153 @@
+<footer class="bg-white border-t border-gray-200 py-8">
+    <div class=" mx-auto px-4">
+
+            <div class="flex flex-col gap-4">
+                <img src="{{url_for('static', filename='kealt.png')}}" alt="logo" class="w-20">
+                <div class="text-gray-600 text-sm">
+                    &copy; 2024 KEALT. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+<style type="text/tailwindcss">
+
+  body {
+    @apply opacity-0 min-h-[100svh] min-h-screen grid grid-rows-[auto_1fr_auto];
+  }
+
+  .ready {
+    @apply opacity-100 transition-opacity duration-500;
+  }
+
+    main {
+        @apply container my-32;
+    }
+    
+    .form-wrapper {
+      @apply flex items-center justify-center;
+    }
+
+    section:not(:first-of-type) {
+      @apply mt-40;
+    }
+
+    sl-button::part(base) {
+      @apply flex items-center justify-center;
+    }
+
+    sl-card {
+      @apply h-full;
+    }
+
+    sl-card::part(base) {
+      @apply h-full;
+    }
+
+    sl-card::part(footer) {
+      @apply mt-auto;
+    }
+
+    sl-input::part(base) {
+      @apply bg-transparent;
+    }
+
+    sl-select::part(base) {
+      @apply bg-transparent;
+    }
+
+    sl-textarea::part(base) {
+      @apply bg-transparent;
+    }
+    
+    th {
+      @apply text-left;
+    }
+</style>
+
+
+
+<script src="{{url_for('static', filename='app.js')}}"></script>
+<script src="{{url_for('static', filename='mixhtml.js')}}"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/shoelace-autoloader.js"></script>
+
+<!-- Because of using Shoelace from CDN, we need to load it first to avoid layout shifts -->
+<script type="module">
+  await Promise.allSettled([
+    customElements.whenDefined('sl-drawer'),
+  ]);
+  document.body.classList.add('ready');
+</script>
+
+<script>
+  const drawer = document.getElementById('cart-drawer');
+  const openButton = document.getElementById('cart-open');
+  const closeButton = drawer.querySelector('sl-button[variant="primary"]');
+
+  openButton.addEventListener('click', () => drawer.show());
+  closeButton.addEventListener('click', () => drawer.hide());
+</script>
+
+
+
+
+<script>
+    // Only initialize map if the element exists
+    const mapElement = document.getElementById('map');
+    if (mapElement) {
+        // Initialize the map
+        var map = L.map('map').setView([55.6845, 12.564148], 12);
+
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 20,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        function restaurantMarkers() {
+            fetch('/get-restaurant-locations')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(restaurants => {
+                restaurants.forEach(function(restaurant) {
+                    var marker = L.marker([restaurant.latitude, restaurant.longitude]).addTo(map);
+                    marker.bindPopup(`<a href="/restaurant/${restaurant.restaurant_pk}">${restaurant.restaurant_name}<img style="aspect-ratio: 16/9; object-fit: cover;" src="/static/restaurants/${restaurant.restaurant_image}" alt="${restaurant.restaurant_name}"></a>`).openPopup();
+                });
+            })
+            .catch(error => console.error('Error fetching restaurant locations:', error));
+        }
+
+        // Call the function after the map is initialized
+        restaurantMarkers();
+    }
+</script>
+
+ <script>
+      tailwind.config = {
+        theme: {
+          container: {
+            center: true,
+            padding: {
+                DEFAULT: '1rem',
+                sm: '2rem',
+                lg: '1rem',
+            },
+          },
+          extend: {
+            colors: {
+              "cta": "#0084C6",
+          },
+        },
+        },
+        
+      }
+    </script>
+
+</body>
+</html>

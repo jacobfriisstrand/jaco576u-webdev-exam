@@ -1,0 +1,103 @@
+<form id="edit-item-form-{{ item.item_pk }}" enctype="multipart/form-data">
+    <div class="grid gap-4" mix-data="#edit-item-form-{{ item.item_pk }}">
+        <div>
+            <label class="flex justify-between" for="item_title">
+                <span>Item name</span>
+                <span>{{ x.ITEM_TITLE_MIN }} to {{ x.ITEM_TITLE_MAX }} characters</span>
+            </label>
+            <sl-input name="item_title"
+                     mix-check="{{ x.ITEM_TITLE_REGEX }}"
+                     value="{{ item.item_title }}">
+            </sl-input>
+        </div>
+        <div>
+            <label class="flex justify-between" for="item_desc">
+                <span>Description</span>
+                <span>{{ x.ITEM_DESC_MIN }} to {{ x.ITEM_DESC_MAX }} characters</span>
+            </label>
+            <sl-textarea name="item_desc"
+                         mix-check="{{ x.ITEM_DESC_REGEX }}"
+                         value="{{ item.item_desc if item else '' }}">
+            </sl-textarea>
+        </div>
+        <div>
+            <label class="flex justify-between" for="item_price">
+                <span>Price (DKK)</span>
+            </label>
+            <sl-input type="text"
+                     name="item_price"
+                     mix-check="{{ x.ITEM_PRICE_REGEX }}"
+                     value="{{ item.item_price if item else '' }}"
+                     step="0.01">
+            </sl-input>
+        </div>
+        <div>
+            <label for="item_image">Item Images</label>
+            <div class="grid gap-4 mt-8">
+                <div>
+                    <label for="item_image_1">Main Image</label>
+                    <div class="flex gap-4 items-center">
+                        {% if item.images[0] %}
+                        <div class="w-24 h-24">
+                            <img 
+                                src="{{ url_for('static', filename='dishes/' + item.images[0].image_filename) }}"
+                                alt="Current main image"
+                                class="w-full h-full object-cover rounded aspect-square">
+                        </div>
+                        {% endif %}
+                        <input type="file"
+                               name="item_image_1"
+                               accept="image/*"
+                               class="block w-full"
+                               mix-data="#edit-item-form-{{ item.item_pk }}"
+                               >
+                    </div>
+                </div>
+                <div>
+                    <label for="item_image_2">Secondary Image</label>
+                    <div class="flex gap-4 items-center">
+                        {% if item.images[1] %}
+                        <div class="w-24 h-24">
+                            <img 
+                                src="{{ url_for('static', filename='dishes/' + item.images[1].image_filename) }}"
+                                alt="{{ item.images[1].image_filename }}"
+                                class="w-full h-full object-cover rounded aspect-square">
+                        </div>
+                        {% endif %}
+                        <input type="file"
+                               name="item_image_2"
+                               accept="image/*"
+                               class="block w-full"
+                               mix-data="#edit-item-form-{{ item.item_pk }}"
+                               >
+                    </div>
+                </div>
+                <div>
+                    <label for="item_image_3">Additional Image</label>
+                    <div class="flex gap-4 items-center">
+                        {% if item.images[2] %}
+                        <div class="w-24 h-24">
+                            <img 
+                                src="{{ url_for('static', filename='dishes/' + item.images[2].image_filename) }}"
+                                alt="{{ item.images[2].image_filename }}"
+                                class="w-full h-full object-cover rounded aspect-square">
+                        </div>
+                        {% endif %}
+                        <input type="file"
+                               name="item_image_3"
+                               accept="image/*"
+                               class="block w-full"
+                               mix-data="#edit-item-form-{{ item.item_pk }}"
+                               >
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div slot="footer" class="flex gap-2">
+        <sl-button mix-data="#edit-item-form-{{ item.item_pk }}" type="submit" variant="primary" mix-put="/items/{{ item.item_pk }}">
+            Update Item
+        </sl-button>
+        <p id="update-success" class="text-green-500"></p>
+    </div>
+</form> 

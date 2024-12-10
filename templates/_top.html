@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='mixhtml.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/themes/light.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>
+        KEALT | {{ title or "KEALT" }}
+    </title>
+</head>
+<body class="w-full h-screen text-gray-900">
+<div>
+    <nav class="fixed gap-2 bg-white z-50 top-0 w-full flex justify-between items-center
+        {% if session.get('user', {}).get('role') in ['admin', 'restaurant', 'partner'] %}
+            flex-row
+        {% else %}
+            flex-col lg:flex-row
+        {% endif %}
+        px-4 py-4 border-b border-gray-200">
+        <div class="flex items-center gap-4">
+            <a class="lg:mr-4" href="/">
+                <img class="max-w-[120px]" src="{{ url_for('static', filename='kealt.png') }}" alt="kealt logo">
+            </a>
+        </div>
+        {% if session.get('user') %}
+            <ul class="flex items-center justify-between w-full md:flex">
+                <div class="flex items-center space-x-2 md:space-x-5">
+                    {% if session.get('user', {}).get('role') == 'customer' %}
+                        <li><a href="{{url_for('view_dishes')}}">Dishes</a></li>
+                        <li><a href="{{url_for('view_restaurants')}}">Restaurants</a></li>
+                    {% endif %}
+                </div>
+                <div class="flex items-center space-x-2">
+                    {% if session.get('user', {}).get('role') == 'customer' %}
+                        <sl-icon-button href="{{url_for('view_search')}}" name="search" label="Search"></sl-icon-button>
+                        <li class="flex items-center space-x-1">
+                            <sl-button id="cart-open" name="cart">
+                                <sl-icon slot="prefix" name="cart"></sl-icon>
+                                <span id="cart-count">
+                                    {% set cart = request.cookies.get('cart') %}
+                                    {{ (cart|from_json)|length if cart else 0 }}
+                                </span>
+                            </sl-button>
+                        </li>
+                    {% endif %}
+                    <li>
+                        <sl-dropdown>
+                            <sl-button class="flex items-center justify-center" name="person-circle" slot="trigger" caret>
+                                {% if session.get('user') %}
+                                    {% if session.get('user').get('user_avatar') %}
+                                        <img src="{{ url_for('static', filename='avatars/' + session.get('user').get('user_avatar')) }}"
+                                             alt="{{session.get('user').get('user_name')}}"
+                                             class="w-6 h-6 rounded-full">
+                                    {% else %}
+                                        <img src="https://ui-avatars.com/api/?name={{ session.get('user').get('user_name', 'U') }}+{{ session.get('user').get('user_last_name', 'U') }}&background=random"
+                                             alt="Generated avatar"
+                                             class="w-6 h-6 rounded-full">
+                                    {% endif %}
+                                {% else %}
+                                    <sl-icon name="person-circle"></sl-icon>
+                                {% endif %}
+                            </sl-button>
+                            <sl-menu class="border border-gray-200">
+                            <sl-menu-label>Hello, {{session.get('user').get('user_name')}}</sl-menu-label>
+                            {% if session.get('user').get('role') == "restaurant" %}
+                                <sl-menu-item value="restaurant-dashboard">
+                                    <a class="flex gap-2 items-center h-10" href="{{url_for('view_restaurant_dashboard')}}">
+                                        <sl-icon slot="prefix" name="shop"></sl-icon>
+                                        Restaurant Dashboard
+                                    </a>
+                                </sl-menu-item>
+                            {% endif %}
+                                <sl-menu-item value="profile">
+                                    <a class="flex gap-2 items-center h-10" href="{{url_for('view_profile')}}">
+                                    <sl-icon slot="prefix" name="person"></sl-icon>
+                                    Profile
+                                </a></sl-menu-item>
+                                <sl-menu-item value="logout">
+                                    <form method="POST" action="{{url_for('logout')}}">
+                                    <button class="flex gap-2 items-center h-10">
+                                        <sl-icon slot="prefix" name="box-arrow-in-right"></sl-icon>
+                                        Logout
+                                    </button>
+                                    </form>
+                                </sl-menu-item>
+                            </sl-menu>
+                            </sl-dropdown>
+                        </li>
+                </div>
+            </ul>
+        {% else %}
+            <ul class="flex space-x-5 list-none items-center justify-between w-full md:flex md:space-x-5">
+                <div class="flex items-center space-x-2 md:space-x-5">
+                    <li><a class="hover:text-cta" href="{{url_for('view_dishes')}}">Dishes</a></li>
+                    <li><a class="hover:text-cta" href="{{url_for('view_restaurants')}}">Restaurants</a></li>
+                </div>
+                <div class="flex items-center gap-2 md:gap-4">
+                    {% if session.get('user', {}).get('role') not in ['restaurant', 'partner'] %}
+                        <sl-icon-button href="{{url_for('view_search')}}" name="search" label="Search"></sl-icon-button>
+                    {% endif %}
+                    {% if not session.get('user') or session.get('user', {}).get('role') not in ['restaurant', 'partner'] %}
+                        <li class="flex items-center space-x-1">
+                            <sl-button id="cart-open" name="cart" label="Cart">
+                                <sl-icon slot="prefix" name="cart"></sl-icon>
+                                <span id="cart-count">
+                                    {% set cart = request.cookies.get('cart') %}
+                                    {{ (cart|from_json)|length if cart else 0 }}
+                                </span>
+                            </li>
+                    {% endif %}
+                    <li>
+                        <sl-dropdown>
+                            <sl-button name="person-circle" slot="trigger" caret hover="text-c-primary"><sl-icon name="person-circle"></sl-icon></sl-button>
+                            <sl-menu class="border-1 border-c-gray:+50">
+                            <sl-menu-item value="login">
+                            <a class="flex gap-2 items-center h-10" href="{{url_for('view_login')}}">Login</a>
+                            </sl-menu-item>
+                            <sl-menu-item value="sign_up">
+                            <a class="flex gap-2 items-center h-10" href="{{url_for('view_signup')}}">Sign up</a>
+                            </sl-menu-item>
+                            </sl-menu>
+                            </sl-dropdown>
+                        </li>
+                </div>
+            </ul>
+        {% endif %}
+    </nav>
+        <div id="toast" class="flex flex-col justify-center fixed w-full bottom-24 right-4 z-[10000000] space-y-2"></div>
+        {% include "__cart.html" %}
+</div>
+</body>
+</html>

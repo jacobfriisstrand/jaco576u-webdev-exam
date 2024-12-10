@@ -1,0 +1,156 @@
+{% include "_top.html" %}
+
+<main class="form-wrapper">
+
+<div class="w-3/4 mx-auto grid gap-10 border border-gray-200 rounded-lg p-6 items-center md:grid-cols-[1fr_auto_1fr]">
+  <div class="flex flex-col gap-10 h-full md:gap-4 justify-center">
+    <div class="max-w-[50%] grid gap-4 mx-auto">
+      <img src="{{ url_for('static', filename='kealt.png') }}" alt="logo">
+      <p class="text-center text-lg">Sign up</p>
+    </div>
+  </div>
+  <div class="h-0.5 w-full h-full bg-gray-200 md:w-0.5"></div>
+  
+  <form id="frm_signup" class="flex flex-col gap-4" onsubmit="return false;">
+    <!-- Common User Fields -->
+    <div>
+      <label for="user_name">Name</label>
+      <sl-input name="user_name"
+                type="text"
+                id="user_name"
+                mix-check="{{ x.USER_NAME_REGEX }}">
+      </sl-input>
+    </div>
+
+    <div>
+      <label for="user_last_name">Last Name</label>
+      <sl-input name="user_last_name"
+                type="text"
+                id="user_last_name"
+                mix-check="{{ x.USER_LAST_NAME_REGEX }}">
+      </sl-input>
+    </div>
+
+    <div>
+      <label for="email">Email</label>
+      <sl-input name="email"
+                type="email"
+                id="email"
+                mix-check="{{ x.REGEX_EMAIL }}">
+      </sl-input>
+    </div>
+
+    <div>
+      <label class="flex justify-between" for="password">
+        <span>Password</span>
+        <span>{{ x.PASSWORD_MIN }} to {{ x.PASSWORD_MAX }} chars</span>
+      </label>
+      <sl-input name="password"
+                type="password"
+                id="password"
+                mix-check="{{ x.REGEX_PASSWORD }}">
+      </sl-input>
+    </div>
+
+    <!-- Role Selection Dropdown -->
+    <div>
+      <label for="role">Account Type</label>
+      <sl-select name="role" id="role-select" hoist>
+        <sl-option value="customer">Customer</sl-option>
+        <sl-option value="partner">Partner</sl-option>
+        <sl-option value="restaurant">Restaurant owner</sl-option>
+      </sl-select>
+    </div>
+
+      <!-- Restaurant-specific Fields (initially hidden) -->
+    <div id="restaurant-fields" style="display: none;" class="bg-gray-200 rounded-lg p-4 border border-gray-200">
+      <div class="grid gap-4">
+        <div>
+          <label for="restaurant_name">Restaurant Name</label>
+          <sl-input name="restaurant_name"
+                    type="text"
+                    id="restaurant_name"
+                    mix-check="{{ x.RESTAURANT_NAME_REGEX }}">
+          </sl-input>
+        </div>
+
+        <div>
+          <label for="restaurant_address">Restaurant Address</label>
+          <sl-input name="restaurant_address"
+                      id="restaurant_address"
+                      mix-check="{{ x.ADDRESS_REGEX }}">
+          </sl-input>
+        </div>
+
+        <div>
+          <label for="restaurant_cuisine_types">Cuisine Types</label>
+          <sl-select name="restaurant_cuisine_types" multiple hoist>
+            {% for cuisine in x.VALID_CUISINE_TYPES %}
+            <sl-option value="{{ cuisine.lower() }}">{{ cuisine.title() }}</sl-option>
+            {% endfor %}
+          </sl-select>
+        </div>
+
+        <div>
+          <label for="price_level">Price Level</label>
+          <sl-select name="price_level" value="$$">
+            {% for price in x.VALID_PRICE_LEVELS %}
+            <sl-option value="{{ price }}">{{ price }}</sl-option>
+            {% endfor %}
+          </sl-select>
+        </div>
+      </div>
+    </div>
+
+    <sl-button type="submit" variant="primary" class="w-full" 
+               mix-post="/signup" 
+               mix-data="#frm_signup">
+      Sign up
+    </sl-button>
+
+  </form>
+</div>
+
+</main>
+
+<script>
+function toggleRestaurantFields(event) {
+  const roleSelect = document.getElementById('role-select');
+  const restaurantFields = document.getElementById('restaurant-fields');
+  
+  const selectedValue = event.target.value;
+  const isRestaurant = selectedValue === 'restaurant';
+  
+  // Toggle restaurant fields visibility
+  restaurantFields.style.display = isRestaurant ? 'block' : 'none';
+  
+  // Get all form inputs in the restaurant fields section
+  const restaurantInputs = restaurantFields.querySelectorAll('sl-input, sl-textarea, sl-select');
+  
+  restaurantInputs.forEach(input => {
+    if (!isRestaurant) {
+      // Clear values when hiding
+      input.value = '';
+      // Disable the inputs so they won't be included in form submission
+      input.disabled = true;
+      input.classList.remove("mix-error");
+    } else {
+      // Re-enable inputs when showing restaurant fields
+      input.disabled = false;
+      input.classList.add("mix-error");
+    }
+  });
+}
+
+// Initialize fields on page load
+document.addEventListener('DOMContentLoaded', () => {
+  const roleSelect = document.querySelector('sl-select[name="role"]');
+  // Create a synthetic event object for the initial call
+  toggleRestaurantFields({ target: { value: roleSelect.value } });
+  
+  // Add event listener for changes
+  roleSelect.addEventListener('sl-change', toggleRestaurantFields);
+});
+</script>
+
+{% include "_bottom.html" %}

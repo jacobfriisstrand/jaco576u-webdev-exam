@@ -1,0 +1,55 @@
+{% include "_top.html" %}
+
+<main>
+    <div class="flex flex-col gap-4 justify-center items-center">
+        <h1>Search</h1>
+        <form id="frm_search" action="/search" method="get" class="flex gap-4">
+            <sl-input
+                name="q"
+                type="text"
+                value="{{ search_query if search_query else '' }}"
+            ></sl-input>
+            <sl-button type="submit" variant="primary">Search</sl-button>
+        </form>
+    </div>
+
+    {% if search_query %}
+        <sl-tab-group class="mt-10">
+            <!-- Tab Navigation -->
+            <sl-tab slot="nav" panel="restaurants" {% if not restaurants %}disabled{% else %}active{% endif %}>
+                Restaurants ({{ restaurants|length }})
+            </sl-tab>
+            <sl-tab slot="nav" panel="dishes" {% if not items %}disabled{% else %}active{% endif %}>
+                Dishes ({{ items|length }})
+            </sl-tab>
+
+            <sl-tab-panel name="restaurants">
+                {% if restaurants %}
+                    <div class="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-10">
+                        {% for restaurant in restaurants %}
+                            {% include "__restaurant.html" %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </sl-tab-panel>
+
+            <sl-tab-panel name="dishes">
+                {% if items %}
+                    <div class="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-10">
+                        {% for item in items %}
+                            {% include "__item.html" %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </sl-tab-panel>
+        </sl-tab-group>
+
+        {% if not restaurants and not items %}
+            <div class="no-results">
+                <p>No results found for "{{ search_query }}"</p>
+            </div>
+        {% endif %}
+    {% endif %}
+</main>
+
+{% include "_bottom.html" %}

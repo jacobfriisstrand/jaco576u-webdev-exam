@@ -1,0 +1,142 @@
+{% include "_top.html" %}
+
+<main class="container mx-auto px-4 py-8 mt-20">
+    <sl-tab-group>
+        <!-- Tab Navigation -->
+        <sl-tab slot="nav" panel="users">Users</sl-tab>
+        <sl-tab slot="nav" panel="restaurants">Restaurants</sl-tab>
+        <sl-tab slot="nav" panel="items">Items</sl-tab>
+
+        <!-- Users Panel -->
+        <sl-tab-panel name="users">
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="px-4 py-2">Image</th>
+                            <th class="px-4 py-2">Name</th>
+                            <th class="px-4 py-2">Email</th>
+                            <th class="px-4 py-2">Role</th>
+                            <th class="px-4 py-2">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr class="border-b hover:bg-gray-50 [&:nth-child(even)]:bg-gray-100">
+                            <td class="px-4 py-2">
+                                <img src="{{ url_for('static', filename='avatars/' + user.user_avatar) }}" 
+                                     alt="{{ user.user_name }}" 
+                                     class="w-10 h-10 rounded-full">
+                            </td>
+                            <td class="px-4 py-2">{{ user.user_name }} {{ user.user_last_name }}</td>
+                            <td class="px-4 py-2">{{ user.user_email }}</td>
+                            <td class="px-4 py-2">
+                                <sl-badge variant="primary">{{ user.role_name }}</sl-badge>
+                            </td>
+                            <td class="px-4 py-2">
+                                {% if user.user_blocked_at == 0 %}
+                                 {% include "___btn_block_user.html" %}
+                                {% else %}
+                                {% include "___btn_unblock_user.html" %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </sl-tab-panel>
+
+        <!-- Restaurants Panel -->
+        <sl-tab-panel name="restaurants">
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="px-4 py-2">Image</th>
+                            <th class="px-4 py-2">Name</th>
+                            <th class="px-4 py-2">Owner</th>
+                            <th class="px-4 py-2">Rating</th>
+                            <th class="px-4 py-2">Cuisine Types</th>
+                            <th class="px-4 py-2">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for restaurant in restaurants %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="px-4 py-2">
+                                <img src="{{ url_for('static', filename='restaurants/' + restaurant.restaurant_image) }}" 
+                                     alt="{{ restaurant.restaurant_name }}" 
+                                     class="w-16 h-16 object-cover rounded">
+                            </td>
+                            <td class="px-4 py-2">{{ restaurant.restaurant_name }}</td>
+                            <td class="px-4 py-2">{{ restaurant.owner_name }}</td>
+                            <td class="px-4 py-2">
+                                <sl-rating readonly value="{{ restaurant.restaurant_rating }}"></sl-rating>
+                            </td>
+                            <td class="px-4 py-2">{{ restaurant.restaurant_cuisine_types }}</td>
+                            <td class="px-4 py-2">
+                                <sl-button size="small" href="/restaurant/{{ restaurant.restaurant_pk }}">
+                                    View Details
+                                </sl-button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </sl-tab-panel>
+
+        <!-- Items Panel -->
+        <sl-tab-panel name="items">
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="px-4 py-2">Image</th>
+                            <th class="px-4 py-2">Name</th>
+                            <th class="px-4 py-2">Restaurant</th>
+                            <th class="px-4 py-2">Price</th>
+                            <th class="px-4 py-2">Actions</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="px-4 py-2">
+                                {% if item.images %}
+                                <img src="{{ url_for('static', filename='dishes/' + item.images[0].image_filename) }}" 
+                                     alt="{{ item.item_title }}" 
+                                     class="w-16 h-16 object-cover rounded">
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-2">{{ item.item_title }}</td>
+                            <td class="px-4 py-2">{{ item.restaurant_name }}</td>
+                            <td class="px-4 py-2">
+                                <sl-format-number type="currency" currency="DKK" value="{{ item.item_price }}"></sl-format-number>
+                            </td>
+                            <td class="px-4 py-2">
+                                {% if item.item_deleted_at == 0 %}
+                                 {% include "___btn_block_item.html" %}
+                                {% else %}
+                                {% include "___btn_unblock_item.html" %}
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-2">
+                                <sl-button size="small" href="/restaurant/{{ item.item_restaurant_fk }}">
+                                    View Restaurant
+                                </sl-button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </sl-tab-panel>
+    </sl-tab-group>
+</main>
+
+{% include "_bottom.html" %}
+</body>
+</html>

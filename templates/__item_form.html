@@ -1,0 +1,75 @@
+<sl-dialog label="{{ title }}" class="dialog-overview">
+    <form id="item-form" class="flex flex-col gap-6" onsubmit="return false;" enctype="multipart/form-data">
+        <div class="flex flex-col gap-4">
+            <div>
+                <label class="flex justify-between items-center text-sm mb-1" for="item_title">
+                    <span>Item name</span>
+                    <span class="text-gray-500">{{ x.ITEM_TITLE_MIN }} to {{ x.ITEM_TITLE_MAX }} characters</span>
+                </label>
+                <sl-input name="item_title"
+                         class="w-full"
+                         mix-check="{{ x.ITEM_TITLE_REGEX }}"
+                         {% if item %}value="{{ item.item_title }}"{% endif %}>
+                </sl-input>
+            </div>
+
+            <div>
+                <label class="flex justify-between items-center text-sm mb-1" for="item_desc">
+                    <span>Description</span>
+                    <span class="text-gray-500">{{ x.ITEM_DESC_MIN }} to {{ x.ITEM_DESC_MAX }} characters</span>
+                </label>
+                <sl-textarea name="item_desc"
+                           mix-check="{{ x.ITEM_DESC_REGEX }}"
+                           {% if item %}value="{{ item.item_desc }}"{% endif %}>
+                </sl-textarea>
+            </div>
+
+            <div>
+                <label class="flex justify-between items-center text-sm mb-1" for="item_price">
+                    <span>Price (DKK)</span>
+                </label>
+                <sl-input type="text"
+                         name="item_price"
+                         mix-check="{{ x.ITEM_PRICE_REGEX }}"
+                         {% if item %}value="{{ item.item_price }}"{% endif %}
+                         step="0.01">
+                </sl-input>
+            </div>
+
+            <div>
+                <label class="text-sm mb-1 block">Item Images</label>
+                <div class="flex flex-col gap-3">
+                    <div>
+                        <label class="text-sm text-gray-600 mb-1 block">Main Image</label>
+                        <input type="file"
+                               name="item_image_1"
+                               accept="image/*"
+                               class="w-full file:mr-4 file:py-2 file:px-4 file:rounded-sm file:border-0 file:text-sm file:bg-gray-100 hover:file:bg-gray-200"
+                               mix-check="{{ x.ITEM_IMAGE_REGEX }}">
+                    </div>
+                    <div>
+                        <label class="text-sm text-gray-600 mb-1 block">Secondary Image</label>
+                        <input type="file"
+                               name="item_image_2"
+                               accept="image/*"
+                               class="w-full file:mr-4 file:py-2 file:px-4 file:rounded-sm file:border-0 file:text-sm file:bg-gray-100 hover:file:bg-gray-200">
+                    </div>
+                    <div>
+                        <label class="text-sm text-gray-600 mb-1 block">Additional Image</label>
+                        <input type="file"
+                               name="item_image_3"
+                               accept="image/*"
+                               class="w-full file:mr-4 file:py-2 file:px-4 file:rounded-sm file:border-0 file:text-sm file:bg-gray-100 hover:file:bg-gray-200">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div slot="footer" class="flex gap-2">
+            <sl-button mix-data="#item-form" type="submit" variant="primary" 
+                      {% if item %}mix-put="/items/{{ item.item_pk }}"{% else %}mix-post="/items"{% endif %}>
+                {{ 'Update' if item else 'Add' }} Item
+            </sl-button>
+        </div>
+    </form>
+</sl-dialog>

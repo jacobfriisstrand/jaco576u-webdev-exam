@@ -1,0 +1,52 @@
+{% include "_top.html" %}
+
+<main class="container mx-auto px-4 py-8">
+  <div class="max-w-2xl mx-auto">
+    <h1 class="text-2xl font-bold mb-8">Create Your Restaurant</h1>
+
+    <form id="frm_new_restaurant" class="space-y-6" onsubmit="return false;">
+      <div>
+        <label for="restaurant_name">Restaurant Name</label>
+        <sl-input name="restaurant_name"
+                  type="text"
+                  id="restaurant_name"
+                  mix-check="{{ x.RESTAURANT_NAME_REGEX }}">
+        </sl-input>
+      </div>
+
+      <div>
+        <label for="restaurant_address">Restaurant Address</label>
+        <sl-input name="restaurant_address"
+                  id="restaurant_address"
+                  mix-check="{{ x.ADDRESS_REGEX }}">
+        </sl-input>
+      </div>
+
+      <div>
+        <label for="restaurant_cuisine_types">Cuisine Types</label>
+        <sl-select name="restaurant_cuisine_types" multiple hoist>
+          {% for cuisine in x.VALID_CUISINE_TYPES %}
+          <sl-option value="{{ cuisine.lower() }}">{{ cuisine.title() }}</sl-option>
+          {% endfor %}
+        </sl-select>
+      </div>
+
+      <div>
+        <label for="price_level">Price Level</label>
+        <sl-select name="price_level" value="$$">
+          {% for price in x.VALID_PRICE_LEVELS %}
+          <sl-option value="{{ price }}">{{ price }}</sl-option>
+          {% endfor %}
+        </sl-select>
+      </div>
+
+      <sl-button type="submit" variant="primary" class="w-full" 
+                 mix-post="/restaurant-dashboard/new" 
+                 mix-data="#frm_new_restaurant">
+        Create Restaurant
+      </sl-button>
+    </form>
+  </div>
+</main>
+
+{% include "_bottom.html" %} 

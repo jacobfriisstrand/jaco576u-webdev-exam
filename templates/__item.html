@@ -1,0 +1,36 @@
+<article class="flex p-4 flex-col justify-between  border border-gray-200 rounded-lg overflow-hidden">
+    <div>
+        <sl-carousel navigation class="h-full w-full item-carousel" mouse-dragging style="--aspect-ratio:1/1;">
+            {% for image in item.images %}
+            <sl-carousel-item class="h-full w-full">
+                <img
+                    src="{{ url_for('static', filename='dishes/' + image.image_filename) }}"
+                    alt="{{ item['item_title'] }} - Image nr {{loop.index}}"
+                    class="object-cover h-full w-full p-4">
+            </sl-carousel-item>
+            {% endfor %}
+        </sl-carousel>
+        <sl-visually-hidden>
+            <form id="cart-add-{{ item['item_pk'] }}">
+                <input type="hidden" name="item_pk" value="{{ item['item_pk'] }}">
+                <input type="hidden" name="item_title" value="{{ item['item_title'] }}">
+                <input type="hidden" name="item_price" value="{{ item['item_price'] }}">
+                <input type="hidden" name="item_restaurant" value="{{ item['restaurant_name'] }}">
+            </form>
+        </sl-visually-hidden>
+    </div>
+    <div class="flex flex-col gap-4">
+        <div class="grid gap-2">
+            <p>{{ item['restaurant_name'] }}</p>
+            <p class="font-bold">{{ item['item_title'] }}</p>
+            <p>{{ item.get('item_desc', '') }}</p>
+        </div>
+        <sl-format-number class="flex text-cta mt-auto font-bold" type="currency" currency="DKK" value="{{ item['item_price'] }}" lang="da"></sl-format-number>
+        <sl-button
+            mix-post="/cart/add"
+            variant="primary"
+            mix-data="#cart-add-{{ item['item_pk'] }}"
+            class="w-full text-white h-full z-10 cursor-pointer leading-none"
+            >Add to cart</sl-button>
+    </div>
+</article>

@@ -1,0 +1,13 @@
+{% include "_top.html" %}
+
+<main>
+    <h1 class="text-4xl font-semibold mb-10">All dishes in Copenhagen</h1>
+    <div id="items" class="grid gap-4 grid-cols-[repeat(auto-fit,minmax(350px,1fr))]">
+        {% for item in items %}
+            {% include "__item.html" %}
+        {% endfor %}
+    </div>
+    {% include "___btn_get_more_items.html"%}
+</main>
+
+{% include "_bottom.html" %}

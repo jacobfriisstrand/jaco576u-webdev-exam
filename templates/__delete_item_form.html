@@ -1,0 +1,16 @@
+<div class="flex flex-col gap-4">
+    <p>Are you sure you want to delete "{{ item.item_title }}"?</p>
+    <p class="text-gray-500">This action cannot be undone.</p>
+</div>
+<div slot="footer" class="flex gap-2">
+    <sl-button variant="neutral" onclick="document.getElementById('delete-item-dialog-{{ item.item_pk }}').hide()">
+        Cancel
+    </sl-button>
+    <sl-button variant="danger" 
+               mix-data="#delete-item-form-{{ item.item_pk }}"
+               mix-put="/items/{{ item.item_pk }}/delete"
+               mix-target="#item-{{ item.item_pk }}"
+               mix-swap="delete">
+        Delete Item
+    </sl-button>
+</div> 

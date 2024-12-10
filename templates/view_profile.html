@@ -1,0 +1,72 @@
+{% include "_top.html" %}
+
+<main class="container mx-auto px-4 pt-20">
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold">Profile Settings</h1>
+        <div class="mt-2 flex items-center gap-2">
+            <span class="text-gray-600">Account type:</span>
+            <sl-tag variant="primary" size="large">
+                {{ session.get('user', {}).get('role')|title }}
+            </sl-tag>
+        </div>
+    </div>
+
+    <div class="grid gap-8 md:grid-cols-2">
+        <!-- Update Profile Form -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-xl font-semibold mb-4">Update Profile</h2>
+            <form mix-target="#profile-message" id="update-profile-form" class="space-y-4" onsubmit="return false;">
+                
+                <div>
+                    <label class="block text-sm font-medium mb-1">Name</label>
+                    <sl-input name="user_name" 
+                             value="{{ user.user_name }}" 
+                             mix-check="{{ x.REGEX_NAME }}"
+                             ></sl-input>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-1">Last Name</label>
+                    <sl-input name="user_last_name" 
+                             value="{{ user.user_last_name }}" 
+                             mix-check="{{ x.REGEX_LAST_NAME }}"
+                             ></sl-input>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-1">Email</label>
+                    <sl-input type="email" 
+                             name="email" 
+                             value="{{ user.user_email }}" 
+                             mix-check="{{ x.REGEX_EMAIL }}"
+                             ></sl-input>
+                </div>
+                
+                <sl-button type="submit" variant="primary" mix-data="#update-profile-form" mix-put="/users/profile">Update Profile</sl-button>
+            </form>
+            <div id="profile-message"></div>
+        </div>
+
+        <!-- Delete Account Form -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-xl font-semibold mb-4 text-red-600">Delete Account</h2>
+            <p class="text-gray-600 mb-4">This action cannot be undone. Please enter your password to confirm.</p>
+            
+            <form id="delete-account-form" class="space-y-4" onsubmit="return false;">
+                
+                <div>
+                    <label class="block text-sm font-medium mb-1">Password</label>
+                    <sl-input type="password" 
+                             name="password" 
+                             mix-check="{{ x.REGEX_PASSWORD }}"
+                             ></sl-input>
+                </div>
+                
+                <sl-button type="submit" variant="danger" mix-put="/users/delete" mix-data="#delete-account-form">Delete Account</sl-button>
+            </form>
+            <div id="delete-message"></div>
+        </div>
+    </div>
+</main>
+
+{% include "_bottom.html" %}

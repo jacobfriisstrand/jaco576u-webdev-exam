@@ -1,0 +1,75 @@
+<form id="add-item-form" enctype="multipart/form-data">
+    <div class="grid gap-4" mix-data="#add-item-form">
+        <div>
+            <label class="flex justify-between" for="item_title">
+                <span>Item title</span>
+
+            </label>
+            <sl-input name="item_title"
+                     mix-check="{{ x.ITEM_TITLE_REGEX }}">
+            </sl-input>
+        </div>
+        <div>
+            <label class="flex justify-between" for="item_desc">
+                <span>Description</span>
+
+            </label>
+            <sl-textarea name="item_desc"
+                        mix-check="{{ x.ITEM_DESC_REGEX }}">
+            </sl-textarea>
+        </div>
+        <div>
+            <label class="flex justify-between" for="item_price">
+                <span>Price (DKK)</span>
+            </label>
+            <sl-input type="text"
+                     name="item_price"
+                     mix-check="{{ x.ITEM_PRICE_REGEX }}"
+                     step="0.01">
+            </sl-input>
+        </div>
+        <div>
+            <label for="item_image">Item Images</label>
+            <div class="grid gap-4 mt-8">
+                <div>
+                    <label for="item_image_1">Main Image</label>
+                    <div class="flex gap-4 items-center">
+                        <input type="file"
+                               name="item_image_1"
+                               accept="image/*"
+                               class="block w-full"
+                               mix-data="#add-item-form">
+                    </div>
+                </div>
+                <div>
+                    <label for="item_image_2">Secondary Image</label>
+                    <div class="flex gap-4 items-center">
+                        <input type="file"
+                               name="item_image_2"
+                               accept="image/*"
+                               class="block w-full"
+                               mix-data="#add-item-form">
+                    </div>
+                </div>
+                <div>
+                    <label for="item_image_3">Additional Image</label>
+                    <div class="flex gap-4 items-center">
+                        <input type="file"
+                               name="item_image_3"
+                               accept="image/*"
+                               class="block w-full"
+                               mix-data="#add-item-form">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div slot="footer" class="flex gap-2">
+        <sl-button type="button" variant="neutral" onclick="closeDialog('add-item-dialog')">
+            Cancel
+        </sl-button>
+        <sl-button mix-data="#add-item-form" type="submit" variant="primary" mix-post="/items">
+            Add Item
+        </sl-button>
+    </div>
+</form>

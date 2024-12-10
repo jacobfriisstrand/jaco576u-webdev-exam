@@ -1,0 +1,45 @@
+{% include "_top.html" %}
+
+<main>
+    <h1 class="text-4xl mb-10">Checkout</h1>
+
+    {% if cart %}
+        <div class="cart-summary">
+            <h2 class="mb-10">Order Summary</h2>
+            <div class="grid gap-6 md:grid-cols-2 md:items-end">
+                <div class="grid gap-4">
+                    {% for item in cart %}
+                        <div class="grid grid-cols-[1fr_auto] items-end p-4 rounded-sm odd:bg-gray-50 even:bg-gray-50">
+                            <div class="flex gap-4 items-end">
+                                <img src="{{ url_for('static', filename='dishes/' + item['item_image']) }}"
+                                     alt="{{ item['item_title'] }}"
+                                     class="w-24 h-24 object-cover rounded-sm"
+                                     >
+                                <div class="flex flex-col gap-1">
+                                    <p class="text-sm">{{ item['item_restaurant'] }}</p>
+                                    <p class="text-lg">{{ item['item_title'] }}</p>
+                                </div>
+                            </div>
+                            <sl-format-number class="font-bold ml-auto" type="currency" currency="DKK" value="{{ item['item_price'] }}" lang="da"></sl-format-number>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="flex my-10 p-4 bg-blue-50 rounded-sm flex-col gap-4 md:my-0 md:justify-end md:h-fit md:gap-10">
+                    <div class="flex justify-between text-lg">
+                        <span class="mr-4">Total</span>
+                        <sl-format-number class="font-bold" type="currency" currency="DKK" value="{{ cart_total|round(2) }}" lang="da"></sl-format-number>
+                    </div>
+                    <form id="frm_checkout">
+                        <sl-button mix-data="#frm_checkout" mix-post="/checkout/confirmed" variant="primary" size="large" class="w-full">Place order</sl-button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div>
+            Your cart is empty. <a href="/" class="text-cta hover:text-blue-800">Continue shopping</a>
+        </div>
+    {% endif %}
+</main>
+
+{% include "_bottom.html" %}

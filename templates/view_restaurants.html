@@ -1,0 +1,13 @@
+{% include "_top.html" %}
+
+<main>
+    <h1 class="text-4xl mb-10">All restaurants in Copenhagen</h1>
+    <div id="restaurants" class="grid gap-7 grid-cols-[repeat(auto-fit,minmax(300px,1fr))] auto-rows-auto">
+        {% for restaurant in restaurants %}
+            {% include "__restaurant.html" %}
+        {% endfor %}
+    </div>
+    {% include "___btn_get_more_restaurants.html"%}
+</main>
+
+{% include "_bottom.html" %}

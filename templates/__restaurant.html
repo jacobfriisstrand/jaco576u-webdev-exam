@@ -1,0 +1,24 @@
+<a href="{{ url_for('view_restaurant', restaurant_pk=restaurant['restaurant_pk']) }}">
+<sl-card>
+<img slot="image" class="aspect-[16/9] p-0 object-cover" src="{{ url_for('static', filename='restaurants/' + restaurant['restaurant_image']) }}" alt="{{ restaurant['restaurant_name'] }}" />
+
+  <div class="grid grid-cols-2 gap-4">
+    <h3 class="text-base">{{ restaurant['restaurant_name'] }}</h3>
+    <p class="text-xs text-right">{{ restaurant.get('restaurant_cuisine_types', '') }}</p>
+    <p class="text-sm col-span-2">{{ restaurant.get('restaurant_catchphrase', '') }}</p>
+  </div>
+
+  <div slot="footer" class="flex justify-between items-center">
+    <div class="flex gap-2 items-center">
+        <sl-badge pill class="text-right">
+            {% set price_level = restaurant.get('restaurant_price_level', '') | length %}
+            {% for i in range(4) %}
+                <span class="opacity-{{ '100' if i < price_level else '50' }}">$</span>
+            {% endfor %}
+        </sl-badge>
+        <sl-rating readonly value="{{ restaurant.get('restaurant_rating', 0) }}"></sl-rating>
+    </div>
+    <sl-icon class="hover:translate-x-2" name="chevron-right"></sl-icon>
+  </div>
+</sl-card>
+</a>

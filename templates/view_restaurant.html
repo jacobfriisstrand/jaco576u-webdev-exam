@@ -1,0 +1,46 @@
+{% include "_top.html" %}
+
+<main>
+<section>
+    <div class="relative w-full h-full min-h-[50vh] rounded-xl overflow-hidden">
+        <img class="absolute object-cover h-full w-full" src="{{ url_for('static', filename='restaurants/' + restaurant['restaurant_image']) }}" alt="{{ restaurant['restaurant_name'] }}">
+        <div class="absolute bottom-0 w-full h-full bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+        <div class="absolute bottom-4 right-4 flex items-center gap-4 items-end text-white rounded-full w-fit">
+            <sl-rating readonly value="{{ restaurant.get('restaurant_rating', 0) }}"></sl-rating>
+            <sl-badge pill class="text-right">
+            {% set price_level = restaurant.get('restaurant_price_level', '') | length %}
+            {% for i in range(4) %}
+            <span class="{{ 'opacity-100' if i < price_level else 'opacity-50' }}">$</span>
+            {% endfor %}
+            </sl-badge>
+        </div>
+        <div class="absolute md:bottom-0 grid gap-4 p-4 text-white bottom-12 md:w-1/2 [text-wrap:balance]">
+            <h1 class="text-4xl font-semibold">{{ restaurant.get('restaurant_name', '') }}</h1>
+            <p>{{ restaurant.get('restaurant_description', '') }}</p>
+        </div>
+            <p>{{ restaurant.get('restaurant_rating', '') }}</p>
+            <p>{{ restaurant.get('restaurant_price_level', '') }}</p>
+            <p>{{ restaurant.get('restaurant_cuisine_types', '') }}</p>
+    </div>
+    <div class="mt-3 [&>p]:grid [&>p]:h-fit [&>p]:space-y-2 [&>p>span]:font-light [&>p>span]:text-sm grid gap-2 grid-cols-1 auto-cols-fr md:grid-cols-3 md:gap-4 m-0 bg-gray-50 border border-gray-200 p-4 rounded-lg flex-col gap-8">
+        <p><span class="font-bold">Address</span>{{ restaurant.get('restaurant_address', '') }}</p>
+        <p><span class="font-bold">Minimum order</span>{{ restaurant.get('restaurant_minimum_order', '') }},-</p>
+        <p class="md:col-start-2"><span class="font-bold">Delivery fee</span>{{ restaurant.get('restaurant_delivery_fee', '') }},-</p>
+        <p class="md:col-start-1 md:row-start-2"><span class="font-bold">Delivery time</span>{{ restaurant.get('restaurant_estimated_delivery_time', '') }}</p>
+        <p class="col-span-2 md:row-start-1 md:col-start-3"><span class="font-bold">Features</span>{{ restaurant.get('restaurant_features', '') }}</p>
+    </div>
+</section>
+
+<section>
+    <h2 class="text-2xl mt-10 mb-5">Menu</h2>
+    <div id="menu" class="grid gap-10 grid-cols-[repeat(auto-fit,minmax(350px,1fr))]">
+        {% for item in items %}
+            {% include "__item.html" %}
+        {% endfor %}
+    </div>
+</section>
+
+</main>
+
+{% include "_bottom.html" %}
+

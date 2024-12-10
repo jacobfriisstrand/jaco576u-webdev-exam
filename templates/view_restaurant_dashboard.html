@@ -1,0 +1,89 @@
+{% include "_top.html" %}
+
+{% if message %}
+<div class="flex flex-col justify-center fixed w-full bottom-24 right-4 z-[10000000] space-y-2">
+    <div class="mx-auto bg-cta text-white border border-white px-8 py-4 rounded-lg z-[10000]" mix-fade-out mix-ttl="4000">
+        {{ message }}
+    </div>
+</div>
+{% endif %}
+<main>
+    <p class="text-lg font-semibold mb-10">Welcome, {{session.user.user_name}}</p>
+    <h1 class="text-4xl font-semibold mb-10">Restaurant Dashboard</h1>
+    <div class="grid gap-4 mt-10">
+        <!-- Restaurant Details -->
+        <sl-card class="grid gap-4 h-fit">
+            <img src="{{ url_for('static', filename='restaurants/' + (restaurant.restaurant_image or 'default_restaurant.jpg')) }}"
+                 alt="{{ restaurant.restaurant_name or 'Restaurant' }}"
+                 class="object-cover md:h-[30vh] w-full rounded-lg" />
+            <p class="text-sm mt-4">Details</p>
+            <div>
+                <div class="mt-4">
+                    <h2 class="text-2xl font-semibold md:text-4xl">{{ restaurant.restaurant_name or 'No Name' }}</h2>
+                    <p class="text-gray-800">{{ restaurant.restaurant_address or 'No Address' }}</p>
+                    <sl-rating class="mt-4" readonly value="{{ restaurant.restaurant_rating or 0 }}"></sl-rating>
+                </div>
+            </div>
+        </sl-card>
+        <div class="flex flex-col gap-4">
+            <!-- Add Item Button -->
+            <div>
+                <sl-button variant="primary" onclick="openDialog('add-item-dialog')">
+                    <sl-icon slot="prefix" name="plus-lg"></sl-icon>
+                    Add New Item
+                </sl-button>
+            </div>
+            <!-- Menu Items -->
+            <sl-details open>
+                <div slot="summary">Menu Items</div>
+                {% include "__items_grid.html" %}
+            </sl-details>
+        </div>
+    </div>
+</main>
+
+<!-- Add Item Dialog - Always present -->
+<sl-dialog id="add-item-dialog" label="Add New Item" class="dialog-overview">
+    <form id="add-item-form" 
+          class="flex flex-col gap-4" 
+          enctype="multipart/form-data" 
+          onsubmit="return false;">
+        {% include "__add_item_form.html" %}
+    </form>
+</sl-dialog>
+
+<!-- Edit and Delete Dialogs - One for each item -->
+{% for item in items %}
+    <!-- Edit Dialog -->
+    <sl-dialog id="edit-item-dialog-{{ item.item_pk }}" label="Edit Item" class="dialog-overview">
+        <form id="edit-item-form-{{ item.item_pk }}" 
+              class="flex flex-col gap-4" 
+              enctype="multipart/form-data"
+              onsubmit="return false;">
+            {% include "__edit_item_form.html" %}
+        </form>
+    </sl-dialog>
+
+    <!-- Delete Dialog -->
+    <sl-dialog id="delete-item-dialog-{{ item.item_pk }}" label="Confirm deletion">
+        <form id="delete-item-form-{{ item.item_pk }}" 
+              class="flex flex-col gap-4" 
+              mix-put="/items/{{ item.item_pk }}/delete"
+              mix-data="#delete-item-form-{{ item.item_pk }}">
+            {% include "__delete_item_form.html" %}
+        </form>
+    </sl-dialog>
+{% endfor %}
+
+<script>
+    function openDialog(dialogId) {
+        const dialog = document.getElementById(dialogId);
+        if (dialog) {
+            dialog.show();
+        } else {
+            console.error('Dialog not found:', dialogId);
+        }
+    }
+</script>
+
+{% include "_bottom.html" %}

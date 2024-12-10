@@ -1,0 +1,20 @@
+<li>
+    <sl-card>
+        <img 
+            slot="image" 
+            class="w-full h-48 object-cover" 
+            src="{{ url_for('static', filename='restaurants/' + restaurant['restaurant_image']) }}" 
+            alt="{{ restaurant['restaurant_name'] }}" 
+        />
+        <div slot="header">
+            <h2 class="text-xl font-semibold">{{restaurant.restaurant_name}}</h2>
+            <p class="text-gray-600">{{restaurant.restaurant_address}}</p>
+        </div>
+        <sl-details summary="Items">
+            
+        </sl-details>
+        <div slot="footer">
+            <sl-rating readonly value="{{ restaurant.get('restaurant_rating', 0) }}"></sl-rating>
+        </div>
+    </sl-card>
+</li>

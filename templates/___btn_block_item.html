@@ -1,0 +1,10 @@
+<form id="frm_item_block">
+<sl-button
+    variant="danger"
+    size="small"
+    id="block-{{ item['item_pk'] }}"
+    mix-put="/items/block/{{ item.item_pk }}"
+    mix-data="#frm_item_block">
+    Block Item
+</sl-button>
+</form>
