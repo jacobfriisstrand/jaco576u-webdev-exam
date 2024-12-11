@@ -55,10 +55,13 @@
     <!-- Role Selection Dropdown -->
     <div>
       <label for="role">Account Type</label>
-      <sl-select name="role" id="role-select" hoist>
-        <sl-option value="customer">Customer</sl-option>
-        <sl-option value="partner">Partner</sl-option>
-        <sl-option value="restaurant">Restaurant owner</sl-option>
+      <sl-select name="role" 
+                 id="role-select" 
+                 hoist 
+                 mix-check="^(customer|partner|restaurant)$">
+        {% for role in x.VALID_ROLES %}
+        <sl-option value="{{ role }}">{{ role.title() }}</sl-option>
+        {% endfor %}
       </sl-select>
     </div>
 

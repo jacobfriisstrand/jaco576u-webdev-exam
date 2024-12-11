@@ -43,12 +43,14 @@ def db():
     db = mysql.connector.connect(
 
         # DEVELOPMENT
+
         # host="mysql",
         # user="root",
         # password="password",
         # database="company",
 
         # PRODUCTION
+
         host="jacobfriisstrand.mysql.eu.pythonanywhere-services.com",
         user="jacobfriisstrand",
         password="webdevexam2024",
@@ -93,11 +95,11 @@ USER_NAME_MAX = 20
 USER_NAME_REGEX = f"^.{{{USER_NAME_MIN},{USER_NAME_MAX}}}$"
 REGEX_NAME = f"^.{{{USER_NAME_MIN},{USER_NAME_MAX}}}$"
 def validate_user_name():
-    error = f"name {USER_NAME_MIN} to {USER_NAME_MAX} characters"
+    """Validate user name and raise CustomException if invalid"""
+    error = f"Name must be between {USER_NAME_MIN} and {USER_NAME_MAX} characters"
     user_name = request.form.get("user_name", "").strip()
     if not re.match(USER_NAME_REGEX, user_name):
-        toast = render_template("___toast.html", message=error)
-        return f"""<template mix-target="#toast">{toast}</template>""", 400
+        raise CustomException(error, 400)
     return user_name
 
 ##############################
@@ -106,21 +108,21 @@ USER_LAST_NAME_MAX = 20
 USER_LAST_NAME_REGEX = f"^.{{{USER_LAST_NAME_MIN},{USER_LAST_NAME_MAX}}}$"
 REGEX_LAST_NAME = f"^.{{{USER_LAST_NAME_MIN},{USER_LAST_NAME_MAX}}}$"
 def validate_user_last_name():
-    error = f"last name {USER_LAST_NAME_MIN} to {USER_LAST_NAME_MAX} characters"
+    """Validate user last name and raise CustomException if invalid"""
+    error = f"Last name must be between {USER_LAST_NAME_MIN} and {USER_LAST_NAME_MAX} characters"
     user_last_name = request.form.get("user_last_name", "").strip()
     if not re.match(USER_LAST_NAME_REGEX, user_last_name):
-        toast = render_template("___toast.html", message=error)
-        return f"""<template mix-target="#toast">{toast}</template>""", 400
+        raise CustomException(error, 400)
     return user_last_name
 
 ##############################
 REGEX_EMAIL = "^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$"
 def validate_email():
-    error = "Email invalid"
+    """Validate email and raise CustomException if invalid"""
+    error = "Please enter a valid email address"
     email = request.form.get("email", "").strip()
     if not re.match(REGEX_EMAIL, email):
-        toast = render_template("___toast.html", message=error)
-        return f"""<template mix-target="#toast">{toast}</template>""", 400
+        raise CustomException(error, 400)
     return email
 
 ##############################
@@ -128,11 +130,11 @@ PASSWORD_MIN = 8
 PASSWORD_MAX = 50
 REGEX_PASSWORD = f"^.{{{PASSWORD_MIN},{PASSWORD_MAX}}}$"
 def validate_password():
-    error = f"password {PASSWORD_MIN} to {PASSWORD_MAX} characters"
+    """Validate password and raise CustomException if invalid"""
+    error = f"Password must be between {PASSWORD_MIN} and {PASSWORD_MAX} characters"
     password = request.form.get("password", "").strip()
     if not re.match(REGEX_PASSWORD, password):
-        toast = render_template("___toast.html", message=error)
-        return f"""<template mix-target="#toast">{toast}</template>""", 400
+        raise CustomException(error, 400)
     return password
 
 ##############################
@@ -140,11 +142,11 @@ RESTAURANT_NAME_MIN = 2
 RESTAURANT_NAME_MAX = 50
 RESTAURANT_NAME_REGEX = f"^.{{{RESTAURANT_NAME_MIN},{RESTAURANT_NAME_MAX}}}$"
 def validate_restaurant_name():
-    error = f"restaurant name {RESTAURANT_NAME_MIN} to {RESTAURANT_NAME_MAX} characters"
+    """Validate restaurant name and raise CustomException if invalid"""
+    error = f"Restaurant name must be between {RESTAURANT_NAME_MIN} and {RESTAURANT_NAME_MAX} characters"
     restaurant_name = request.form.get("restaurant_name", "").strip()
     if not re.match(RESTAURANT_NAME_REGEX, restaurant_name):
-        toast = render_template("___toast.html", message=error)
-        return f"""<template mix-target="#toast">{toast}</template>""", 400
+        raise CustomException(error, 400)
     return restaurant_name
 
 ##############################
@@ -152,22 +154,21 @@ ADDRESS_MIN = 2
 ADDRESS_MAX = 100
 ADDRESS_REGEX = f"^.{{{ADDRESS_MIN},{ADDRESS_MAX}}}$"
 def validate_address():
-    error = f"Address {ADDRESS_MIN} to {ADDRESS_MAX} characters"
+    """Validate address and raise CustomException if invalid"""
+    error = f"Address must be between {ADDRESS_MIN} and {ADDRESS_MAX} characters"
     restaurant_address = request.form.get("restaurant_address", "").strip()
     if not re.match(ADDRESS_REGEX, restaurant_address):
-        toast = render_template("___toast.html", message=error)
-        return f"""<template mix-target="#toast">{toast}</template>""", 400
+        raise CustomException(error, 400)
     return restaurant_address
 
 ##############################
 REGEX_UUID4 = "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
 def validate_uuid4(uuid4 = ""):
-    error = f"invalid uuid4"
+    error = "Invalid UUID format"
     if not uuid4:
         uuid4 = request.values.get("uuid4", "").strip()
     if not re.match(REGEX_UUID4, uuid4):
-        toast = render_template("___toast.html", message=error)
-        return f"""<template mix-target="#toast">{toast}</template>""", 400
+        raise CustomException(error, 400)
     return uuid4
 
 ##############################
@@ -181,18 +182,74 @@ def allowed_file(filename):
 
 def validate_file_upload(file):
     if not file or file.filename == '':
-        toast = render_template("___toast.html", message="No file uploaded")
-        return f"""<template mix-target="#toast">{toast}</template>""", 400
+        raise CustomException("No file uploaded", 400)
 
     if '.' not in file.filename or file.filename.rsplit('.', 1)[1].lower() not in ALLOWED_EXTENSIONS:
-        toast = render_template("___toast.html", message="File type is not allowed")
-        return f"""<template mix-target="#toast">{toast}</template>""", 400
+        raise CustomException("File type is not allowed", 400)
 
     # Generate a secure filename
     unique_filename = f"{uuid.uuid4()}.{file.filename.rsplit('.', 1)[1].lower()}"
     return unique_filename
 
 ##############################
+
+ITEM_TITLE_MIN = 2
+ITEM_TITLE_MAX = 50
+ITEM_TITLE_REGEX = f"^.{{{ITEM_TITLE_MIN},{ITEM_TITLE_MAX}}}$"
+def validate_item_title():
+    """Validate item title and raise CustomException if invalid"""
+    error = f"Item title must be between {ITEM_TITLE_MIN} and {ITEM_TITLE_MAX} characters"
+    item_title = request.form.get("item_title", "").strip()
+    if not re.match(ITEM_TITLE_REGEX, item_title):
+        raise CustomException(error, 400)
+    return item_title
+
+##############################
+ITEM_DESC_MIN = 10
+ITEM_DESC_MAX = 255
+ITEM_DESC_REGEX = f"^.{{{ITEM_DESC_MIN},{ITEM_DESC_MAX}}}$"
+def validate_item_description():
+    """Validate item description and raise CustomException if invalid"""
+    error = f"Item description must be between {ITEM_DESC_MIN} and {ITEM_DESC_MAX} characters"
+    item_desc = request.form.get("item_desc", "").strip()
+    if not re.match(ITEM_DESC_REGEX, item_desc):
+        raise CustomException(error, 400)
+    return item_desc
+
+##############################
+
+ITEM_PRICE_MIN = 1
+ITEM_PRICE_MAX = 999.99
+ITEM_PRICE_REGEX = r"^\d+(\.\d{1,2})?$"
+
+def validate_item_price():
+    """Validate item price and raise CustomException if invalid"""
+    error = f"Price must be between {ITEM_PRICE_MIN} and {ITEM_PRICE_MAX}"
+    try:
+        price = float(request.form.get("item_price", "0").strip())
+        if price <= 0 or price > ITEM_PRICE_MAX:
+            toast = render_template("___toast.html", message=error)
+            raise CustomException(toast, 400)
+        return price
+    except ValueError:
+        toast = render_template("___toast.html", message="Invalid price format")
+        raise CustomException(toast, 400)
+
+##############################
+def validate_cuisine_types():
+    error = "Please select at least one cuisine type"
+    cuisine_types = request.form.getlist("restaurant_cuisine_types")
+    if not cuisine_types:
+        raise CustomException(error, 400)
+    
+    # Validate against allowed cuisine types from constants
+    from constants import cuisine_types as allowed_cuisines
+    for cuisine in cuisine_types:
+        if cuisine not in allowed_cuisines:
+            raise CustomException("Invalid cuisine type selected", 400)
+            
+    return cuisine_types
+
 def _get_email_template(title, content):
     """Helper function to generate consistently styled email template"""
     return f"""
@@ -477,39 +534,39 @@ def send_item_blocked_email(to_email, user_name, item_title):
         ic(ex)
         raise_custom_exception("cannot send email", 500)
 
-def validate_item_title():
-    """Validate item title from form data"""
-    title = request.form.get("item_title", "").strip()
-    if not title:
-        raise CustomException("Item title is required", 400)
-    if len(title) < 2:
-        raise CustomException("Item title must be at least 2 characters", 400)
-    if len(title) > 50:
-        raise CustomException("Item title must be less than 50 characters", 400)
-    return title
+VALID_ROLES = ["customer", "partner", "restaurant"]
 
-def validate_item_description():
-    """Validate item description from form data"""
-    desc = request.form.get("item_desc", "").strip()
-    if not desc:
-        raise CustomException("Item description is required", 400)
-    if len(desc) < 10:
-        raise CustomException("Item description must be at least 10 characters", 400)
-    if len(desc) > 255:
-        raise CustomException("Item description must be less than 255 characters", 400)
-    return desc
-
-def validate_item_price():
-    """Validate item price from form data"""
-    try:
-        price = float(request.form.get("item_price", "0").strip())
-        if price <= 0:
-            raise CustomException("Price must be greater than 0", 400)
-        if price > 999.99:
-            raise CustomException("Price must be less than 1000", 400)
-        return price
-    except ValueError:
-        raise CustomException("Invalid price format", 400)
+def validate_role():
+    """Validate user role and raise CustomException if invalid"""
+    error = "Please select a valid account type"
+    role = request.form.get("role", "").strip().lower()
+    
+    # Debug prints
+    ic("Validating role")
+    ic("Role received:", role)
+    ic("Valid roles:", VALID_ROLES)
+    ic("Is role valid?", role in VALID_ROLES)
+    
+    # Check if role exists and is valid
+    if not role or role not in VALID_ROLES:
+        ic("Invalid role detected")
+        toast = render_template("___toast.html", message=error)
+        raise CustomException(toast, 400)
+    
+    # Also validate against role_pk mapping to ensure consistency
+    role_pk = {
+        "customer": CUSTOMER_ROLE_PK,
+        "partner": PARTNER_ROLE_PK,
+        "restaurant": RESTAURANT_ROLE_PK
+    }.get(role)
+    
+    if not role_pk:
+        ic("Role PK not found for role:", role)
+        toast = render_template("___toast.html", message=error)
+        raise CustomException(toast, 400)
+    
+    ic("Role validation successful:", role)    
+    return role
 
 
 
