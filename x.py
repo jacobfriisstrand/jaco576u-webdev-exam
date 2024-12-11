@@ -41,15 +41,18 @@ def raise_custom_exception(error, status_code):
 ##############################
 def db():
     db = mysql.connector.connect(
-        # host="jacobfriisstrand.mysql.eu.pythonanywhere-services.com",      # This should match your Docker service name
-        host="mysql",
-        # user="jacobfriisstrand",
-        user="root",
-        # password="webdevexam2024",  # Ensure this matches your docker-compose.yml
-        password="password",
-        # database="jacobfriisstrand$company",
-        database="company",
-                # Ensure this database exists
+
+        # DEVELOPMENT
+        # host="mysql",
+        # user="root",
+        # password="password",
+        # database="company",
+
+        # PRODUCTION
+        host="jacobfriisstrand.mysql.eu.pythonanywhere-services.com",
+        user="jacobfriisstrand",
+        password="webdevexam2024",
+        database="jacobfriisstrand$company",
     )
     cursor = db.cursor(dictionary=True)
     return db, cursor
