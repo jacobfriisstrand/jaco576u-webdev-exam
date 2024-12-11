@@ -2,7 +2,6 @@ from flask import request, make_response, render_template
 from functools import wraps
 import mysql.connector
 import re
-import os
 import uuid
 import time
 
@@ -137,6 +136,7 @@ def validate_password():
         raise CustomException(error, 400)
     return password
 
+
 ##############################
 RESTAURANT_NAME_MIN = 2
 RESTAURANT_NAME_MAX = 50
@@ -236,19 +236,54 @@ def validate_item_price():
         raise CustomException(toast, 400)
 
 ##############################
+VALID_CUISINE_TYPES = cuisine_types
+
 def validate_cuisine_types():
+    """Validate cuisine types and raise CustomException if invalid"""
     error = "Please select at least one cuisine type"
     cuisine_types = request.form.getlist("restaurant_cuisine_types")
+    
+    # Debug logging
+    ic("Received cuisine types:", cuisine_types)
+    ic("Form data:", request.form)
+    
     if not cuisine_types:
+        ic("No cuisine types selected")
         raise CustomException(error, 400)
     
     # Validate against allowed cuisine types from constants
     from constants import cuisine_types as allowed_cuisines
+    ic("Allowed cuisines:", allowed_cuisines)
+    
+    # Convert received cuisines to proper format for comparison
+    formatted_cuisines = []
     for cuisine in cuisine_types:
-        if cuisine not in allowed_cuisines:
-            raise CustomException("Invalid cuisine type selected", 400)
+        if isinstance(cuisine, str):
+            formatted_cuisine = cuisine.strip()
+            if formatted_cuisine not in allowed_cuisines:
+                ic(f"Invalid cuisine detected: {formatted_cuisine}")
+                raise CustomException("Invalid cuisine type selected", 400)
+            formatted_cuisines.append(formatted_cuisine)
+        else:
+            ic(f"Invalid cuisine format: {cuisine}")
+            raise CustomException("Invalid cuisine type format", 400)
             
-    return cuisine_types
+    return formatted_cuisines
+
+##############################
+VALID_PRICE_LEVELS = price_levels
+
+def validate_price_level():
+    error = "Please select a valid price level"
+    price_level = request.form.get("price_level")
+    if not price_level:
+        raise CustomException(error, 400)
+    
+    # Validate against allowed price levels from constants
+    if price_level not in price_levels:
+        raise CustomException("Invalid price level selected", 400)
+            
+    return price_level
 
 def _get_email_template(title, content):
     """Helper function to generate consistently styled email template"""

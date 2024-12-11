@@ -1074,18 +1074,33 @@ def signup():
             ]
 
             for item in default_items:
+                # Create the item first
+                item_pk = str(uuid.uuid4())
                 cursor.execute("""
                     INSERT INTO items (
                         item_pk, item_restaurant_fk, item_title, 
-                        item_desc, item_price, item_image
-                    ) VALUES (%s, %s, %s, %s, %s, %s)
+                        item_desc, item_price
+                    ) VALUES (%s, %s, %s, %s, %s)
                 """, (
-                    str(uuid.uuid4()),
+                    item_pk,
                     restaurant_pk,
                     item["title"],
                     f"Our delicious {item['title'].lower()}",
-                    item["price"],
-                    f"dish_{random.randint(1, 100)}.jpg"
+                    item["price"]
+                ))
+                
+                # Then add a default image for the item
+                cursor.execute("""
+                    INSERT INTO item_images (
+                        image_pk, image_item_fk, image_filename, 
+                        image_order, image_created_at
+                    ) VALUES (%s, %s, %s, %s, %s)
+                """, (
+                    str(uuid.uuid4()),
+                    item_pk,
+                    f"dish_{random.randint(1, 100)}.jpg",
+                    0,  # First image
+                    int(time.time())
                 ))
 
         db.commit()

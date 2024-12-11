@@ -89,7 +89,7 @@
           <label for="restaurant_cuisine_types">Cuisine Types</label>
           <sl-select name="restaurant_cuisine_types" multiple hoist>
             {% for cuisine in x.VALID_CUISINE_TYPES %}
-            <sl-option value="{{ cuisine.lower() }}">{{ cuisine.title() }}</sl-option>
+            <sl-option value="{{ cuisine }}">{{ cuisine }}</sl-option>
             {% endfor %}
           </sl-select>
         </div>
