@@ -6,17 +6,13 @@ import x
 import json
 import uuid 
 import time
-import redis
 import os
 import json
 import random
 import constants
 from faker import Faker
 from werkzeug.utils import secure_filename
-import re
 from functools import wraps
-from decimal import Decimal
-from datetime import datetime
 
 def role_required(required_role):
     def decorator(f):
@@ -39,7 +35,7 @@ from icecream import ic
 ic.configureOutput(prefix=f'***** | ', includeContext=True)
 
 app = Flask(__name__)
-app.config['SESSION_TYPE'] = 'filesystem'  # or 'redis', etc.
+app.config['SESSION_TYPE'] = 'filesystem'  #
 Session(app)
 
 
@@ -54,24 +50,6 @@ def _________GET_________(): pass
 ##############################
 ##############################
 
-##############################
-@app.get("/test-set-redis")
-def view_test_set_redis():
-    redis_host = "redis"
-    redis_port = 6379
-    redis_client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)    
-    redis_client.set("name", "Santiago", ex=10)
-    # name = redis_client.get("name")
-    return "name saved"
-
-@app.get("/test-get-redis")
-def view_test_get_redis():
-    redis_host = "redis"
-    redis_port = 6379
-    redis_client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)    
-    name = redis_client.get("name")
-    if not name: name = "no name"
-    return name
 
 ##############################
 @app.get("/")
@@ -374,7 +352,7 @@ def view_restaurant(restaurant_pk):
         
         items_cursor.close()
         
-        return render_template("view_restaurant.html", restaurant=restaurant, items=items)
+        return render_template("view_restaurant.html", title="Restaurant Details", restaurant=restaurant, items=items)
     
     except Exception as ex:
         ic(ex)
@@ -399,12 +377,6 @@ def view_restaurant(restaurant_pk):
         if "db" in locals(): db.close()
 
 ##############################
-def check_role_access(allowed_roles):
-    """Helper function to check if user has access to a role"""
-    if not session.get("user"):
-        return False
-    return session["user"].get("role") in allowed_roles
-
 @app.get("/dishes")
 def view_dishes():
     try:
@@ -550,7 +522,7 @@ def view_signup():
         #     return redirect(url_for("view_choose_role"))
 
         # Render the appropriate signup form based on the role
-        return render_template("view_signup.html", x=x)
+        return render_template("view_signup.html", title="Sign Up", x=x)
 
     except Exception as ex:
         ic(ex)
@@ -653,7 +625,7 @@ def get_search():
 @app.get("/forgot-password")
 @x.no_cache
 def view_forgot_password():
-    return render_template("view_forgot_password.html", title="Reset password", x=x)
+    return render_template("view_forgot_password.html", title="Reset Password", x=x)
 
 ##############################
 @app.get("/reset-password/<reset_key>")
@@ -682,7 +654,7 @@ def view_reset_password(reset_key):
                 return redirect(url_for("view_login", message="Invalid or expired reset link"))
         
         reset_key = x.validate_uuid4(reset_key)
-        return render_template("view_reset_password.html", reset_key=reset_key, title="Set New Password", x=x)
+        return render_template("view_reset_password.html", title="Set New Password", reset_key=reset_key, x=x)
         
     except Exception as ex:
         ic(ex)
@@ -690,25 +662,6 @@ def view_reset_password(reset_key):
     finally:
         if "cursor" in locals(): cursor.close()
         if "db" in locals(): db.close()
-
-##############################
-@app.get("/customer")
-@x.no_cache
-def view_customer():
-    if not session.get("user"): 
-        return redirect(url_for("view_login"))
-    if session["user"].get("role") != "customer":
-        return redirect(url_for("view_index"))
-    return render_template("view_customer.html", user=session["user"])
-
-##############################
-@app.get("/partner")
-@x.no_cache
-def view_partner():
-    if not check_role_access(['partner']):
-        return redirect(url_for("view_index"))
-    return redirect(url_for("view_profile"))
-
 
 ##############################
 @app.get("/admin-dashboard")
@@ -762,6 +715,7 @@ def view_admin():
 
         message = "No users found." if not users else ""
         return render_template("view_admin.html", 
+                             title="Admin Dashboard",
                              users=users, 
                              user=user, 
                              items=items, 
@@ -852,11 +806,11 @@ def view_checkout():
     cart_total = sum(float(item.get('item_price', 0)) for item in cart)
     
     return render_template("view_checkout.html", 
+                           title="Checkout",
                            user_email=user_email, 
                            user_name=user_name,
                            cart=cart, 
-                           cart_total=cart_total, 
-                           title="Checkout")
+                           cart_total=cart_total)
 
 
 ##############################
@@ -865,7 +819,7 @@ def view_thank_you():
     if not session.get("user", ""): 
         return redirect(url_for("view_login"))
     
-    return render_template("view_thank_you.html")
+    return render_template("view_thank_you.html", title="Thank You")
 
 
 
@@ -1981,9 +1935,6 @@ def _________BRIDGE_________(): pass
 @app.post("/cart/add")
 def add_to_cart():
     try:
-        # Remove this check to allow non-logged in users to add to cart
-        # if not check_role_access(['customer']):
-        #     raise x.CustomException("Unauthorized", 401)
 
         # Get item details with detailed logging
         item_pk = request.form.get('item_pk')
@@ -2073,9 +2024,6 @@ def add_to_cart():
 @app.post("/cart/remove")
 def remove_from_cart():
     try:
-        # Remove this check to allow non-logged in users to remove from cart
-        # if not check_role_access(['customer']):
-        #     raise x.CustomException("Unauthorized", 401)
 
         cart_item_id = request.form.get('cart_item_id')
         ic(f"Attempting to remove cart item with ID: {cart_item_id}")
