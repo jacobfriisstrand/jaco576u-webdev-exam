@@ -172,7 +172,12 @@ def validate_uuid4(uuid4 = ""):
     return uuid4
 
 ##############################
+# PRODUCTION
 UPLOAD_ITEM_FOLDER = '/home/jacobfriisstrand/jaco576u-webdev-exam/static/dishes'
+
+# DEVELOPMENT
+# UPLOAD_ITEM_FOLDER = 'static/dishes'
+
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'webp'}
 
 def allowed_file(filename):

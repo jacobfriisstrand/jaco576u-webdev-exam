@@ -615,53 +615,6 @@ def view_search():
         if "db" in locals(): db.close()
 
 
-##############################
-@app.post("/search/<search_query>")
-def get_search():
-    q = request.args.get('q', '')
-    return render_template("view_search.html", title="Search", x=x, q=q)
-
-##############################
-@app.get("/forgot-password")
-@x.no_cache
-def view_forgot_password():
-    return render_template("view_forgot_password.html", title="Reset Password", x=x)
-
-##############################
-@app.get("/reset-password/<reset_key>")
-@x.no_cache
-def view_reset_password(reset_key):
-    try:
-        db, cursor = x.db()
-        current_time = int(time.time())
-        
-        # Check users table first
-        q_user = """SELECT user_pk FROM users 
-                    WHERE user_password_reset_key = %s 
-                    AND user_password_reset_expires_at > %s"""
-        cursor.execute(q_user, (reset_key, current_time))
-        user = cursor.fetchone()
-        
-        # If not in users table, check restaurants
-        if not user:
-            q_restaurant = """SELECT restaurant_pk FROM restaurants 
-                             WHERE restaurant_password_reset_key = %s 
-                             AND restaurant_password_reset_expires_at > %s"""
-            cursor.execute(q_restaurant, (reset_key, current_time))
-            restaurant = cursor.fetchone()
-            
-            if not restaurant:
-                return redirect(url_for("view_login", message="Invalid or expired reset link"))
-        
-        reset_key = x.validate_uuid4(reset_key)
-        return render_template("view_reset_password.html", title="Set New Password", reset_key=reset_key, x=x)
-        
-    except Exception as ex:
-        ic(ex)
-        return redirect(url_for("view_login", message="Invalid reset link"))
-    finally:
-        if "cursor" in locals(): cursor.close()
-        if "db" in locals(): db.close()
 
 ##############################
 @app.get("/admin-dashboard")
@@ -904,6 +857,55 @@ def forgot_password():
     finally:
         if "cursor" in locals(): cursor.close()
         if "db" in locals(): db.close()
+
+##############################
+@app.post("/search/<search_query>")
+def search():
+    q = request.args.get('q', '')
+    return render_template("view_search.html", title="Search", x=x, q=q)
+
+##############################
+@app.get("/forgot-password")
+@x.no_cache
+def view_forgot_password():
+    return render_template("view_forgot_password.html", title="Reset Password", x=x)
+
+##############################
+@app.get("/reset-password/<reset_key>")
+@x.no_cache
+def view_reset_password(reset_key):
+    try:
+        db, cursor = x.db()
+        current_time = int(time.time())
+        
+        # Check users table first
+        q_user = """SELECT user_pk FROM users 
+                    WHERE user_password_reset_key = %s 
+                    AND user_password_reset_expires_at > %s"""
+        cursor.execute(q_user, (reset_key, current_time))
+        user = cursor.fetchone()
+        
+        # If not in users table, check restaurants
+        if not user:
+            q_restaurant = """SELECT restaurant_pk FROM restaurants 
+                             WHERE restaurant_password_reset_key = %s 
+                             AND restaurant_password_reset_expires_at > %s"""
+            cursor.execute(q_restaurant, (reset_key, current_time))
+            restaurant = cursor.fetchone()
+            
+            if not restaurant:
+                return redirect(url_for("view_login", message="Invalid or expired reset link"))
+        
+        reset_key = x.validate_uuid4(reset_key)
+        return render_template("view_reset_password.html", title="Set New Password", reset_key=reset_key, x=x)
+        
+    except Exception as ex:
+        ic(ex)
+        return redirect(url_for("view_login", message="Invalid reset link"))
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
+
 
 ##############################
 @app.post("/reset-password/<reset_key>")
@@ -1220,6 +1222,9 @@ def create_item():
         except x.CustomException as validation_error:
             return f"""<template mix-target="#toast" mix-bottom>{validation_error.message}</template>""", validation_error.code
         
+        # Ensure upload directory exists
+        os.makedirs(x.UPLOAD_ITEM_FOLDER, exist_ok=True)
+        
         # Validate files
         validated_files = {}
         for key in request.files:
@@ -1240,7 +1245,7 @@ def create_item():
                 item_pk, item_restaurant_fk, item_title, 
                 item_desc, item_price, item_created_at, 
                 item_deleted_at, item_updated_at, item_blocked_at
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             item_pk,
             session["user"]["restaurant"]["restaurant_pk"],
@@ -1298,16 +1303,21 @@ def create_item():
 def process_checkout():
     try:
         # Ensure user is logged in
-        if not session.get("user", ""): 
+        if not session["user"].get("role") == "customer":
             return redirect(url_for("view_login"))
-        
-        # Get email and name directly from the session
-        user_email = session["user"]["user_email"]
-        user_name = session["user"]["user_name"]
         
         # Get cart from cookies
         cart_cookie = request.cookies.get("cart", "[]")
         cart = json.loads(cart_cookie) if cart_cookie else []
+        
+        # Check if cart is empty
+        if not cart:
+            toast = render_template("___toast.html", message="Your cart is empty")
+            return f"""<template mix-target="#toast" mix-bottom>{toast}</template>""", 400
+        
+        # Get email and name directly from the session
+        user_email = session["user"]["user_email"]
+        user_name = session["user"]["user_name"]
         
         # Send checkout confirmation email
         x.send_checkout_email(user_email, user_name, cart)
@@ -1874,6 +1884,19 @@ def update_profile():
         user_last_name = x.validate_user_last_name()
         user_email = x.validate_email()
         
+        db, cursor = x.db()
+        
+        # Check if email exists for any other user
+        cursor.execute("""
+            SELECT user_pk FROM users 
+            WHERE user_email = %s 
+            AND user_pk != %s 
+            AND user_deleted_at = 0
+        """, (user_email, user_pk))
+        
+        if cursor.fetchone():
+            raise x.CustomException("Email already exists", 400)
+        
         # Handle avatar upload if provided
         avatar_filename = None
         if 'avatar' in request.files:
@@ -1884,8 +1907,6 @@ def update_profile():
                 avatar_filename = f"{uuid.uuid4()}_{secure_filename(file.filename)}"
                 file.save(os.path.join(x.UPLOAD_AVATAR_FOLDER, avatar_filename))
 
-        db, cursor = x.db()
-        
         # Update user info
         if avatar_filename:
             cursor.execute("""
@@ -1920,6 +1941,63 @@ def update_profile():
         db.commit()
         toast = render_template("___toast.html", message="Profile updated successfully")
         return f"""<template mix-target="#toast">{toast}</template>"""
+
+    except Exception as ex:
+        ic(ex)
+        if "db" in locals(): db.rollback()
+        if isinstance(ex, x.CustomException):
+            toast = render_template("___toast.html", message=ex.message)
+            return f"""<template mix-target="#toast">{toast}</template>""", ex.code
+        if isinstance(ex, x.mysql.connector.Error):
+            if "users.user_email" in str(ex):
+                toast = render_template("___toast.html", message="Email already exists")
+                return f"""<template mix-target="#toast">{toast}</template>""", 400
+            toast = render_template("___toast.html", message="System error")
+            return f"""<template mix-target="#toast">{toast}</template>""", 500
+        return """<template mix-target="#toast">System error</template>""", 500
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
+        
+
+@app.put("/users/delete")
+def delete_account():
+    try:
+        if not session.get("user"):
+            raise x.CustomException("Please login", 401)
+
+        password = x.validate_password()
+        user_pk = session.get("user").get("user_pk")
+        user_email = session.get("user").get("user_email")
+
+        db, cursor = x.db()
+        
+        # Verify password
+        cursor.execute("SELECT user_password FROM users WHERE user_pk = %s", (user_pk,))
+        user = cursor.fetchone()
+        if not user or not check_password_hash(user["user_password"], password):
+            raise x.CustomException("Invalid password", 401)
+
+        # Soft delete user
+        deleted_at = int(time.time())
+        cursor.execute("""
+            UPDATE users 
+            SET user_deleted_at = %s
+            WHERE user_pk = %s
+        """, (deleted_at, user_pk))
+
+        if cursor.rowcount != 1:
+            raise x.CustomException("Could not delete account", 400)
+
+        # Send deletion confirmation email
+        x.send_account_deletion_email(user_email)
+
+        db.commit()
+        session.clear()
+        
+        return """
+            <template mix-redirect="/login?message=Account+deleted+successfully"></template>
+        """
 
     except Exception as ex:
         ic(ex)
@@ -1985,7 +2063,8 @@ def add_to_cart():
         image_result = cursor.fetchone()
         
         if not image_result:
-            return {"error": "No image found for item"}, 400
+            toast = render_template("___toast.html", message="No image found for item")
+            return f"""<template mix-target="#toast" mix-bottom>{toast}</template>""", 400
             
         item_image = image_result['image_filename']
 
@@ -2302,54 +2381,7 @@ def add_item_images(item_pk):
 
 
 
-@app.put("/users/delete")
-def delete_account():
-    try:
-        if not session.get("user"):
-            raise x.CustomException("Please login", 401)
 
-        password = x.validate_password()
-        user_pk = session.get("user").get("user_pk")
-        user_email = session.get("user").get("user_email")
-
-        db, cursor = x.db()
-        
-        # Verify password
-        cursor.execute("SELECT user_password FROM users WHERE user_pk = %s", (user_pk,))
-        user = cursor.fetchone()
-        if not user or not check_password_hash(user["user_password"], password):
-            raise x.CustomException("Invalid password", 401)
-
-        # Soft delete user
-        deleted_at = int(time.time())
-        cursor.execute("""
-            UPDATE users 
-            SET user_deleted_at = %s
-            WHERE user_pk = %s
-        """, (deleted_at, user_pk))
-
-        if cursor.rowcount != 1:
-            raise x.CustomException("Could not delete account", 400)
-
-        # Send deletion confirmation email
-        x.send_account_deletion_email(user_email)
-
-        db.commit()
-        session.clear()
-        
-        return """
-            <template mix-redirect="/login?message=Account+deleted+successfully"></template>
-        """
-
-    except Exception as ex:
-        ic(ex)
-        if "db" in locals(): db.rollback()
-        if isinstance(ex, x.CustomException):
-            return f"""<template mix-target="#toast">{ex.message}</template>""", ex.code
-        return """<template mix-target="#toast">System error</template>""", 500
-    finally:
-        if "cursor" in locals(): cursor.close()
-        if "db" in locals(): db.close()
 
 ##############################
 
