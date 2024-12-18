@@ -1,10 +1,10 @@
-<form id="frm_user_unblock">
+<form id="frm_user_unblock_{{ user.user_pk }}">
 <sl-button
     variant="success"
     size="small"
-    id="unblock-{{ user['user_pk'] }}"
+    id="unblock-{{ user.user_pk }}"
     mix-put="/users/unblock/{{ user.user_pk }}"
-    mix-data="#frm_user_unblock">
+    mix-data="#frm_user_unblock_{{ user.user_pk }}">
     Unblock
 </sl-button>
 </form>
