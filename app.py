@@ -63,6 +63,8 @@ def view_index():
                 return redirect(url_for("view_restaurant_dashboard"))
             elif role == "partner":
                 return redirect(url_for("view_profile"))
+            elif role == "admin":
+                return redirect(url_for("view_admin"))
         
         db, cursor = x.db()
         
@@ -724,7 +726,7 @@ def view_profile():
                 title="Profile",
                 x=x,
                 user=session.get("user", {})
-            )
+            ) 
         
     except Exception as ex:
         ic(ex)
@@ -1612,7 +1614,7 @@ def item_block(item_pk):
             toast = render_template("___toast.html", message=f"Notification email sent to {item_info['restaurant_owner']}")
             
             return f"""
-                <template mix-target="#frm_item_block" mix-replace>{btn_unblock}</template>
+                <template mix-target="#frm_item_block_{item_pk}" mix-replace>{btn_unblock}</template>
                 <template mix-target="#toast" mix-bottom>{toast}</template>
             """
 
@@ -1665,7 +1667,7 @@ def item_unblock(item_pk):
  
         db.commit()
         return f"""
-            <template mix-target="#frm_item_unblock" mix-replace>{btn_block}</template>
+            <template mix-target="#frm_item_unblock_{item_pk}" mix-replace>{btn_block}</template>
             <template mix-target="#toast" mix-bottom>{toast}</template>
         """
     

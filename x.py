@@ -43,17 +43,17 @@ def db():
 
         # DEVELOPMENT
 
-        # host="mysql",
-        # user="root",
-        # password="password",
-        # database="company",
+        host="mysql",
+        user="root",
+        password="password",
+        database="company",
 
         # PRODUCTION
 
-        host="jacobfriisstrand.mysql.eu.pythonanywhere-services.com",
-        user="jacobfriisstrand",
-        password="webdevexam2024",
-        database="jacobfriisstrand$company",
+        # host="jacobfriisstrand.mysql.eu.pythonanywhere-services.com",
+        # user="jacobfriisstrand",
+        # password="webdevexam2024",
+        # database="jacobfriisstrand$company",
     )
     cursor = db.cursor(dictionary=True)
     return db, cursor
@@ -173,10 +173,10 @@ def validate_uuid4(uuid4 = ""):
 
 ##############################
 # PRODUCTION
-UPLOAD_ITEM_FOLDER = '/home/jacobfriisstrand/jaco576u-webdev-exam/static/dishes'
+# UPLOAD_ITEM_FOLDER = '/home/jacobfriisstrand/jaco576u-webdev-exam/static/dishes'
 
 # DEVELOPMENT
-# UPLOAD_ITEM_FOLDER = 'static/dishes'
+UPLOAD_ITEM_FOLDER = 'static/dishes'
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'webp'}
 
