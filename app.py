@@ -1755,19 +1755,16 @@ def user_update():
 @app.put("/users/block/<user_pk>")
 def user_block(user_pk):
     try:
-        # Check if user is logged in and has admin role
         if not session.get("user") or session["user"].get("role") != "admin":
             raise x.CustomException("Unauthorized", 401)
 
-        # Validate UUID and prepare user data
         user_pk = x.validate_uuid4(user_pk)
         current_time = int(time.time())
-        user_data = {
+        user = {
             "user_pk": user_pk,
             "user_blocked_at": current_time
         }
 
-        # Database operations
         db, cursor = x.db()
         
         # First check if user exists and is not already blocked
@@ -1790,24 +1787,25 @@ def user_block(user_pk):
 
         # Get user details for email notification
         cursor.execute('SELECT user_name, user_email FROM users WHERE user_pk = %s', (user_pk,))
-        user = cursor.fetchone()
+        user_data = cursor.fetchone()
         
-        if user:
+        if user_data:
             # Send email notification
-            x.send_user_blocked_email(user['user_email'], user['user_name'])
+            x.send_user_blocked_email(user_data['user_email'], user_data['user_name'])
             
             # Return both button update and email confirmation toast
-            btn_unblock = render_template("___btn_unblock_user.html", user=user_data)
-            toast = render_template("___toast.html", message=f"Notification email sent to {user['user_name']}")
+            btn_unblock = render_template("___btn_unblock_user.html", user=user)
+            toast = render_template("___toast.html", message=f"Notification email sent to {user_data['user_name']}")
             
+            db.commit()
             return f"""
-                <template mix-target="#frm_user_block" mix-replace>{btn_unblock}</template>
+                <template mix-target="#frm_user_block_{user_pk}" mix-replace>{btn_unblock}</template>
                 <template mix-target="#toast" mix-bottom>{toast}</template>
             """
 
-        # If no user found, just return the button update
-        btn_unblock = render_template("___btn_unblock_user.html", user=user_data)
-        return f"""<template mix-target="#frm_user_block" mix-replace>{btn_unblock}</template>"""
+        db.commit()
+        btn_unblock = render_template("___btn_unblock_user.html", user=user)
+        return f"""<template mix-target="#frm_user_block_{user_pk}" mix-replace>{btn_unblock}</template>"""
     
     except Exception as ex:
         ic(ex)
@@ -1838,22 +1836,30 @@ def user_unblock(user_pk):
         }
 
         db, cursor = x.db()
+        
+        # First check if user exists and is blocked
+        cursor.execute('SELECT user_blocked_at FROM users WHERE user_pk = %s', (user_pk,))
+        existing_user = cursor.fetchone()
+        
+        if not existing_user:
+            raise x.CustomException("User not found", 404)
+            
+        if existing_user['user_blocked_at'] == 0:
+            raise x.CustomException("User is already unblocked", 400)
+
         cursor.execute("""
             UPDATE users 
             SET user_blocked_at = %s,
                 user_updated_at = %s
             WHERE user_pk = %s
-        """, (user_blocked_at, 0, user_pk))
-
-        if cursor.rowcount != 1:
-            raise x.CustomException("Cannot unblock user", 400)
+        """, (user_blocked_at, int(time.time()), user_pk))
  
         btn_block = render_template("___btn_block_user.html", user=user)
         toast = render_template("___toast.html", message="User has been unblocked")
  
         db.commit()
         return f"""
-            <template mix-target="#frm_user_unblock" mix-replace>{btn_block}</template>
+            <template mix-target="#frm_user_unblock_{user_pk}" mix-replace>{btn_block}</template>
             <template mix-target="#toast" mix-bottom>{toast}</template>
         """
     
@@ -1872,7 +1878,6 @@ def user_unblock(user_pk):
         if "cursor" in locals(): cursor.close()
         if "db" in locals(): db.close()
 
-##############################
 @app.put("/users/profile")
 def update_profile():
     try:
